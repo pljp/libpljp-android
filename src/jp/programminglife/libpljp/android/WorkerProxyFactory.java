@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -39,6 +40,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * インターフェイスのメソッドを非同期やトランザクションで実行するProxyを作成するファクトリクラス。
  */
 public class WorkerProxyFactory {
+
 
     /**
      * メソッドをトランザクション内で実行することを指定するアノテーション。
@@ -51,16 +53,23 @@ public class WorkerProxyFactory {
     public @interface Async {}
 
 
+    public interface WorkerProxyListener {
+        void thrown(Throwable t, Object delegate, Method m, Object[] args);
+    }
+
+
     private static final class InvocationHandler_ implements InvocationHandler {
 
         private final Object delegate;
         private final ExecutorService pool;
         private final SQLiteOpenHelper helper;
+        private final WorkerProxyListener listener;
 
-        private InvocationHandler_(ExecutorService threadPool, SQLiteOpenHelper helper, Object delegate) {
+        private InvocationHandler_(ExecutorService threadPool, SQLiteOpenHelper helper, Object delegate, WorkerProxyListener listener) {
             this.pool = threadPool;
             this.helper = helper;
             this.delegate = delegate;
+            this.listener = listener;
         }
 
 
@@ -71,7 +80,14 @@ public class WorkerProxyFactory {
 
             Method delegateMethod = delegate.getClass().getMethod(method.getName(), method.getParameterTypes());
             Transaction transaction = delegateMethod.getAnnotation(Transaction.class);
-            if ( transaction != null && helper != null ) {
+            Async async = delegateMethod.getAnnotation(Async.class);
+
+            if ( transaction != null && helper == null )
+                throw new IllegalStateException("helper == null");
+            if ( async != null && pool == null )
+                throw new IllegalStateException("pool == null");
+
+            if ( transaction != null ) {
 
                 task = new Callable<Object>() {
                     @Override
@@ -87,10 +103,14 @@ public class WorkerProxyFactory {
 
                         }
                         catch (InvocationTargetException ex) {
+                            Exception ex2 = ex;
                             if ( ex.getCause() instanceof Exception )
-                                throw (Exception)ex.getCause();
+                                ex2 = (Exception)ex.getCause();
+                            if ( listener != null )
+                                listener.thrown(ex2, delegate, method, args);
                             else
-                                throw ex;
+                                throw ex2;
+
                         }
                         finally {
                             db.endTransaction();
@@ -119,10 +139,13 @@ public class WorkerProxyFactory {
 
             }
 
-            Async async = delegateMethod.getAnnotation(Async.class);
-            if ( async != null && pool != null ) {
-                pool.submit(task);
+            if ( async != null ) {
+
+                Future<Object> future = pool.submit(task);
+                if ( method.getReturnType() == Future.class )
+                    return future;
                 return null;
+
             }
             else {
                 return task.call();
@@ -132,10 +155,18 @@ public class WorkerProxyFactory {
     }
 
 
+    @SuppressWarnings("unchecked")
+    public static <T> T getProxy(ExecutorService threadPool, SQLiteOpenHelper helper, T delegate, Class<T> interfaceClass) {
+
+        return (T)Proxy.newProxyInstance(WorkerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(threadPool, helper, delegate, null));
+
+    }
+
     /**
      * <p>delegateのメソッドの呼び出しにアノテーションで機能を付加できるプロキシオブジェクトを作成する。アノテーションはインターフェイスではなく、その実装に付ける。</p>
      * <p>Asyncアノテーションが付いたメソッドはthreadPoolのsubmit(Callable<T>)で非同期に実行される。
-     * 非同期メソッドの実行完了や実行結果、例外を伝達する仕組みはこのクラスでは用意しないので、ThreadPoolExecuterをオーバーライドするなどして呼び出し元で独自に用意する必要がある。</p>
+     * 非同期メソッドの実行結果を受け取りたいときは、非同期メソッドの戻り型をFutureにする。
+     * 例外を受け取りたい場合はWorkerProxyListenerで受け取ることができる。</p>
      * <p>Transactionが付いたメソッドはhelperから書き込み可能なSQLiteDatabaseオブジェクトでトランザクションを開始する。
      * メソッドが例外をスローした場合はロールバックする。例外が出なければコミットする。</p>
      * @param threadPool Asyncメソッドを実行するスレッドプール。nullを渡すとAsyncアノテーションが付いたメソッドを実行したときにIllegalStateExceptionをスローする。
@@ -145,9 +176,9 @@ public class WorkerProxyFactory {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getProxy(ExecutorService threadPool, SQLiteOpenHelper helper, T delegate, Class<T> interfaceClass) {
+    public static <I, D extends I> I getProxy(ExecutorService threadPool, SQLiteOpenHelper helper, D delegate, Class<I> interfaceClass, WorkerProxyListener listener) {
 
-        return (T)Proxy.newProxyInstance(WorkerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(threadPool, helper, delegate));
+        return (I)Proxy.newProxyInstance(WorkerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(threadPool, helper, delegate, listener));
 
     }
 
