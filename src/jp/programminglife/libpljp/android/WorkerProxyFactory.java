@@ -54,6 +54,12 @@ public class WorkerProxyFactory {
 
 
     public interface WorkerProxyListener {
+        /** Asyncメソッドで例外がスローされた時に呼び出されるハンドラーメソッド。
+         * @param t スローされた例外。
+         * @param delegate メソッドが実行されたオブジェクト。
+         * @param m 実行されたメソッド。
+         * @param args メソッドの引数。
+         */
         void thrown(Throwable t, Object delegate, Method m, Object[] args);
     }
 
@@ -80,7 +86,7 @@ public class WorkerProxyFactory {
 
             Method delegateMethod = delegate.getClass().getMethod(method.getName(), method.getParameterTypes());
             Transaction transaction = delegateMethod.getAnnotation(Transaction.class);
-            Async async = delegateMethod.getAnnotation(Async.class);
+            final Async async = delegateMethod.getAnnotation(Async.class);
 
             if ( transaction != null && helper == null )
                 throw new IllegalStateException("helper == null");
@@ -98,18 +104,8 @@ public class WorkerProxyFactory {
                         db.beginTransaction();
                         try {
 
-                            ret = method.invoke(delegate, args);
+                            ret = invoke(delegate, method, args, async != null);
                             db.setTransactionSuccessful();
-
-                        }
-                        catch (InvocationTargetException ex) {
-                            Exception ex2 = ex;
-                            if ( ex.getCause() instanceof Exception )
-                                ex2 = (Exception)ex.getCause();
-                            if ( listener != null )
-                                listener.thrown(ex2, delegate, method, args);
-                            else
-                                throw ex2;
 
                         }
                         finally {
@@ -125,14 +121,9 @@ public class WorkerProxyFactory {
 
                 task = new Callable<Object>() {
                     @Override
-                    public Object call() {
+                    public Object call() throws Exception {
 
-                        try {
-                            return method.invoke(delegate, args);
-                        }
-                        catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                        return invoke(delegate, method, args, async != null);
 
                     }
                 };
@@ -152,6 +143,50 @@ public class WorkerProxyFactory {
             }
 
         }
+
+
+        private Object invoke(Object delegate, Method method, Object[] args, boolean async) throws Exception {
+
+            if ( !async ) {
+
+                try {
+                    return method.invoke(delegate, args);
+                }
+
+                // 同期メソッドの場合は例外をスローする
+
+                catch (InvocationTargetException ex) {
+                    if ( ex.getCause() instanceof Exception )
+                        throw (Exception)ex.getCause();
+                    throw new RuntimeException(ex);
+                }
+                catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+
+            Throwable t = null;
+            try {
+
+                return method.invoke(delegate, args);
+
+            }
+
+            // 非同期メソッドの場合は例外をリスナーに通知する
+
+            catch (InvocationTargetException ex) {
+                t = ex.getCause();
+            }
+            catch (Exception ex) {
+                t = ex;
+            }
+
+            if ( t != null && listener != null )
+                listener.thrown(t, delegate, method, args);
+            return null;
+        }
+
     }
 
 
