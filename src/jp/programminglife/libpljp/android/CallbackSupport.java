@@ -22,17 +22,16 @@ package jp.programminglife.libpljp.android;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.List;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 /**
- * 複数のコールバックメソッドの一括呼び出しを簡単にするクラス。
+ * 複数のコールバックメソッドの一括呼び出しを簡単にするクラス。このクラスはスレッドセーフ。
  * @param <T> コールバックオブジェクトのインターフェイス型。
  */
 public final class CallbackSupport<T> {
@@ -75,36 +74,10 @@ public final class CallbackSupport<T> {
     };
 
 
-    private void invokeAll(Method method, Object[] args) {
-
-        synchronized (lock) {
-
-            errors.clear();
-            for (WeakReference<T> ref : callbacks) {
-                try {
-
-                    T callback = ref.get();
-                    if ( callback != null ) {
-                        method.invoke(callback, args);
-                    }
-
-                }
-                catch (InvocationTargetException ex) {
-                    errors.add(ex.getCause());
-                }
-                catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        }
-
-    }
-
-
     private final Object lock = new Object();
     private final Class<?>[] callbackClass;
     private final ArrayList<WeakReference<T>> callbacks;
-    private final ArrayList<Throwable> errors;
+    //private final ArrayList<Throwable> errors;
     private final Handler handler;
 
 
@@ -117,7 +90,7 @@ public final class CallbackSupport<T> {
 
         this.callbackClass = new Class[] {interfaceClass};
         callbacks = new ArrayList<WeakReference<T>>();
-        errors = new ArrayList<Throwable>();
+        //errors = new ArrayList<Throwable>();
         Looper looper = Looper.getMainLooper();
         handler = new Handler(looper);
 
@@ -204,16 +177,47 @@ public final class CallbackSupport<T> {
     }
 
 
-    /**
+    private void invokeAll(Method method, Object[] args) {
+
+        synchronized (lock) {
+
+            //errors.clear();
+            for (WeakReference<T> ref : callbacks) {
+                try {
+
+                    T callback = ref.get();
+                    if ( callback != null ) {
+                        method.invoke(callback, args);
+                    }
+
+                }
+                /*
+                catch (InvocationTargetException ex) {
+                    errors.add(ex.getCause());
+                }
+                */
+                catch (Exception ex) {
+                    //throw new RuntimeException(ex);
+                    Log.d("CallbackSupport", "", ex);
+                }
+            }
+
+        }
+
+    }
+
+
+    /*
      * 直前のプロキシメソッド呼び出しでコールバックメソッドがスローした例外のリストを返す。
      * 次のプロキシメソッドの呼び出しでこれまでの例外リストはクリアされる。
      * @return
-     */
+     *
     public List<Throwable> getExceptions() {
         synchronized (lock) {
             return new ArrayList<Throwable>(errors);
         }
     }
+    */
 
 
     /**
