@@ -28,6 +28,8 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -35,7 +37,7 @@ import android.os.Bundle;
 /**
  * メソッドの呼び出しをIntentに変換するプロキシを作るファクトリクラス。
  * getProxyメソッドでプロキシを作成する。このプロキシのメソッドを呼ぶとプロキシメソッドの名前と引数の情報がIntentに記録され、
- * CallbackのhandleメソッドでそのIntentを受け取ることができる。
+ * CallbackのsendメソッドでそのIntentを送信する。
  * メソッド呼び出しの情報が記録されたIntentをexecuteメソッドに渡すことでメソッドの呼び出しを実施できる。
  * 作成されたIntentにはプロキシオブジェクトのクラス情報は含まれていないため、プロキシの型とexecuteメソッドに渡されたObjectの型に互換性があるかどうかは
  * このクラスのクライアント側で確認する必要がある。
@@ -91,6 +93,12 @@ public class IntentProxyFactory {
     }
 
 
+    /**
+     * メソッド呼び出しをIntentにパックして送信するプロキシを作成する。
+     * @param callback
+     * @param interfaceClass
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public static <T> T getProxy(Callback callback, Class<T> interfaceClass) {
         return (T)Proxy.newProxyInstance(HandlerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(callback));
@@ -98,7 +106,33 @@ public class IntentProxyFactory {
 
 
     /**
-     * Intentに記録されたメソッドの呼び出しを実行する。
+     * ServiceにコマンドIntentを送るプロキシを作成する。
+     * @param context
+     * @param serviceClass
+     * @param interfaceClass
+     * @return
+     */
+    public static <T> T getServiceProxy(final Context context, final Class<? extends Service> serviceClass, Class<T> interfaceClass) {
+
+        return getProxy(new Callback() {
+
+            @Override
+            public Intent newIntent() {
+                return new Intent(context, serviceClass);
+            }
+
+            @Override
+            public void send(Intent intent) {
+                context.startService(intent);
+            }
+
+        }, interfaceClass);
+
+    }
+
+
+    /**
+     * Intentに記録されたメソッドの呼び出しを実行する。このメソッドはサービス側で実行する。
      * @param obj メソッドを呼び出す対象のオブジェクト。
      * @param intent プロキシメソッドの呼び出しによって作られたIntent。
      * @return 実行したメソッドの戻り値。
