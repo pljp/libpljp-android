@@ -42,11 +42,12 @@ import android.os.Bundle;
  * 作成されたIntentにはプロキシオブジェクトのクラス情報は含まれていないため、プロキシの型とexecuteメソッドに渡されたObjectの型に互換性があるかどうかは
  * このクラスのクライアント側で確認する必要がある。
  */
-public class IntentProxyFactory {
+public final class IntentProxyFactory {
 
-    private static String EXTRA_METHOD =                    "jp.programminglife.libpljp.android.method";
-    private static String EXTRA_METHOD_PARAMETER_TYPES =    "jp.programminglife.libpljp.android.method_parameter_types";
-    private static String EXTRA_METHOD_PARAMETERS =         "jp.programminglife.libpljp.android.method_parameters";
+    private static final String EXTRA_METHOD =                    "jp.programminglife.libpljp.android.method";
+    private static final String EXTRA_METHOD_PARAMETER_TYPES =    "jp.programminglife.libpljp.android.method_parameter_types";
+    private static final String EXTRA_METHOD_PARAMETERS =         "jp.programminglife.libpljp.android.method_parameters";
+    private static final String EXTRA_INTERFACE =                 "jp.programminglife.libpljp.android.interface";
 
 
     public interface Callback {
@@ -60,10 +61,12 @@ public class IntentProxyFactory {
     private static final class InvocationHandler_ implements InvocationHandler {
 
         private final Callback callback;
+        private final String interfaceName;
 
 
-        private InvocationHandler_(Callback callback) {
+        private InvocationHandler_(Callback callback, Class<?> interfaceClass) {
             this.callback = callback;
+            this.interfaceName = interfaceClass.getName();
         }
 
 
@@ -77,7 +80,7 @@ public class IntentProxyFactory {
             }
 
             Intent intent = callback.newIntent();
-
+            intent.putExtra(EXTRA_INTERFACE, interfaceName);
             intent.putExtra(EXTRA_METHOD, method.getName());
 
             ArrayList<Class<?>> ptypes = new ArrayList<Class<?>>(Arrays.asList(method.getParameterTypes()));
@@ -101,7 +104,7 @@ public class IntentProxyFactory {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getProxy(Callback callback, Class<T> interfaceClass) {
-        return (T)Proxy.newProxyInstance(HandlerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(callback));
+        return (T)Proxy.newProxyInstance(HandlerProxyFactory.class.getClassLoader(), new Class<?>[] {interfaceClass}, new InvocationHandler_(callback, interfaceClass));
     }
 
 
@@ -131,6 +134,18 @@ public class IntentProxyFactory {
     }
 
 
+    public static String getInteraceName(Intent intent) {
+
+        Bundle ex = intent.getExtras();
+        if ( ex == null ) {
+            throw new IllegalArgumentException("extra == null");
+        }
+
+        return ex.getString(EXTRA_INTERFACE);
+
+    }
+
+
     /**
      * Intentに記録されたメソッドの呼び出しを実行する。このメソッドはサービス側で実行する。
      * @param obj メソッドを呼び出す対象のオブジェクト。
@@ -153,24 +168,29 @@ public class IntentProxyFactory {
             throw new IllegalArgumentException("extra == null");
         }
 
+        String interfaceName = ex.getString(EXTRA_INTERFACE);
         String methodName = ex.getString(EXTRA_METHOD);
         @SuppressWarnings("unchecked")
         ArrayList<Class<?>> ptypes = (ArrayList<Class<?>>)ex.getSerializable(EXTRA_METHOD_PARAMETER_TYPES);
         @SuppressWarnings("unchecked")
         ArrayList<Object> params = (ArrayList<Object>) ex.getSerializable(EXTRA_METHOD_PARAMETERS);
 
-        if ( methodName == null || ptypes == null || params == null ) {
+        if ( interfaceName == null || methodName == null || ptypes == null || params == null ) {
             throw new IllegalArgumentException("extraの値にnullがある");
         }
 
         try {
-            Method method = obj.getClass().getMethod(methodName, ptypes.toArray(new Class[0]));
+            Class<?> interfaceClass = Class.forName(interfaceName);
+            Method method = interfaceClass.getMethod(methodName, ptypes.toArray(new Class[0]));
             return method.invoke(obj, params.toArray(new Object[0]));
         }
         catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(e);
         }
         catch (IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+        catch (ClassNotFoundException e) {
             throw new IllegalArgumentException(e);
         }
 
