@@ -27,39 +27,31 @@ import android.util.Log;
 
 public final class Logger {
 
+    private static String defaultPrefix;
     private final String tag;
+
+
+    public static void setPrefix(String prefix) {
+        defaultPrefix = prefix;
+    }
+
+
+    public Logger(Class<?> cls) {
+        this(cls, defaultPrefix);
+    }
 
 
     /**
      *
      * @param cls
-     * @param prefix ログのタグのプレフィックス。prefix + "." + cls.getSimpleName() がタグになる。
+     * @param prefix ログのタグのプレフィックス。prefix + "." + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
      */
     public Logger(Class<?> cls, String prefix) {
-        tag = prefix + "." + cls.getSimpleName();
-    }
 
-
-    /**
-     * メソッド名をLog.d()で出力する。
-     */
-    public void d() {
-
-        if ( !BuildConfig.DEBUG ) return;
-        Log.d(tag, "[" + getMethodName() + "] ");
-
-    }
-
-
-    /**
-     * BuildConfig.DEBUGがtrueならデフォルトのロケールでString.format()でメッセージを整形してLog.d()で出力する。
-     * @param message
-     * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
-     */
-    public void d(String message, Object ... args) {
-
-        if ( !BuildConfig.DEBUG ) return;
-        Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( prefix != null )
+            tag = prefix + "." + cls.getSimpleName();
+        else
+            tag = cls.getSimpleName();
 
     }
 
@@ -106,8 +98,46 @@ public final class Logger {
     }
 
 
+    /**
+     * メソッド名をLog.d()で出力する。
+     */
+    public void d() {
+
+        if ( !BuildConfig.DEBUG ) return;
+        Log.d(tag, "[" + getMethodName() + "] ");
+
+    }
+
+
+    /**
+     * BuildConfig.DEBUGがtrueならデフォルトのロケールでString.format()でメッセージを整形してLog.d()で出力する。
+     * @param message
+     * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
+     */
+    public void d(String message, Object ... args) {
+
+        if ( !BuildConfig.DEBUG ) return;
+        Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
+
+    }
+
+
+    /**
+     * メソッド名をLog.v()で出力する。
+     */
+    public void v() {
+
+        if ( !BuildConfig.DEBUG ) return;
+        Log.v(tag, "[" + getMethodName() + "] ");
+
+    }
+
+
     public void v(String message, Object ... args) {
+
+        if ( !BuildConfig.DEBUG ) return;
         Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
+
     }
 
 
