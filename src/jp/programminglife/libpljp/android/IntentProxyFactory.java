@@ -20,6 +20,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -27,11 +32,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 
 
 /**
@@ -60,6 +60,8 @@ public final class IntentProxyFactory {
 
     private static final class InvocationHandler_ implements InvocationHandler {
 
+        private static final ArrayList<Object> EMPTY_OBJECT_LIST = new ArrayList<Object>(0);
+        //        private final Logger log = new Logger(IntentProxyFactory.class);
         private final Callback callback;
         private final String interfaceName;
 
@@ -71,13 +73,12 @@ public final class IntentProxyFactory {
 
 
         @Override
-        public Object invoke(Object proxy, final Method method, final Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-            for (Object a : args) {
-                if ( !(a instanceof Serializable) ) {
-                    throw new IllegalArgumentException("argsにSerializableではないオブジェクトがある");
-                }
-            }
+            if ( args != null)
+                for (Object a : args)
+                    if (!(a instanceof Serializable))
+                        throw new IllegalArgumentException("argsにSerializableではないオブジェクトがある");
 
             Intent intent = callback.newIntent();
             intent.putExtra(EXTRA_INTERFACE, interfaceName);
@@ -86,7 +87,7 @@ public final class IntentProxyFactory {
             ArrayList<Class<?>> ptypes = new ArrayList<Class<?>>(Arrays.asList(method.getParameterTypes()));
             intent.putExtra(EXTRA_METHOD_PARAMETER_TYPES, ptypes);
 
-            ArrayList<Object> params = new ArrayList<Object>(Arrays.asList(args));
+            ArrayList<Object> params = args != null ? new ArrayList<Object>(Arrays.asList(args)) : EMPTY_OBJECT_LIST;
             intent.putExtra(EXTRA_METHOD_PARAMETERS, params);
 
             callback.send(intent);
