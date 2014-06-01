@@ -20,19 +20,25 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
-import java.util.Locale;
-
 import android.util.Log;
+
+import java.util.Locale;
 
 
 public final class Logger {
 
     private static String defaultPrefix;
+    private static boolean debug = false;
     private final String tag;
 
 
     public static void setPrefix(String prefix) {
         defaultPrefix = prefix;
+    }
+
+
+    public static void setDebug(boolean debug) {
+        Logger.debug = debug;
     }
 
 
@@ -116,7 +122,7 @@ public final class Logger {
      */
     public void d(String message, Object ... args) {
 
-        if ( !BuildConfig.DEBUG ) return;
+        if ( !debug ) return;
         Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
@@ -127,7 +133,7 @@ public final class Logger {
      */
     public void v() {
 
-        if ( !BuildConfig.DEBUG ) return;
+        if ( !debug ) return;
         Log.v(tag, "[" + getMethodName() + "] ");
 
     }
@@ -135,7 +141,7 @@ public final class Logger {
 
     public void v(String message, Object ... args) {
 
-        if ( !BuildConfig.DEBUG ) return;
+        if ( !debug ) return;
         Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
