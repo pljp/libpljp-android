@@ -22,6 +22,7 @@ package jp.programminglife.libpljp.android;
 
 import android.util.Log;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 
 
@@ -67,6 +68,10 @@ public final class Logger {
     }
 
 
+    /**
+     * @deprecated Throwableオブジェクトの出力はセキュリティのため {@link #d(Throwable, String, Object...)}, {@link #v(Throwable, String, Object...)}を使うこと。
+     */
+    @Deprecated
     public void wtf(Throwable t, String message, Object ... args) {
         Log.wtf(tag, format(message, args), t);
     }
@@ -79,6 +84,10 @@ public final class Logger {
     }
 
 
+    /**
+     * @deprecated Throwableオブジェクトの出力はセキュリティのため {@link #d(Throwable, String, Object...)}, {@link #v(Throwable, String, Object...)}を使うこと。
+     */
+    @Deprecated
     public void e(Throwable t, String message, Object ... args) {
 
         Log.e(tag, format(message, args), t);
@@ -128,6 +137,14 @@ public final class Logger {
     }
 
 
+    public void d(Throwable t, String message, Object ... args) {
+
+        if ( !debug ) return;
+        Log.d(tag, "[" + getMethodName() + "] " + format(message, args), t);
+
+    }
+
+
     /**
      * メソッド名をLog.v()で出力する。
      */
@@ -143,6 +160,14 @@ public final class Logger {
 
         if ( !debug ) return;
         Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
+
+    }
+
+
+    public void v(Throwable t, String message, Object ... args) {
+
+        if ( !debug ) return;
+        Log.v(tag, "[" + getMethodName() + "] " + format(message, args), t);
 
     }
 
@@ -165,7 +190,27 @@ public final class Logger {
         try {
             Thread cur = Thread.currentThread();
             StackTraceElement[] stackTrace = cur.getStackTrace();
-            return stackTrace[4].getMethodName() + " (" + cur.getName() + ")";
+            StackTraceElement element = stackTrace[4];
+            String methodName = element.getMethodName();
+            try {
+
+                Class<?> cls = Class.forName(element.getClassName());
+                if ( cls.isAnonymousClass() ) {
+
+                    if ( cls.getEnclosingConstructor() != null )
+                        methodName = "<init>" + ":" + methodName;
+                    else {
+                        Method em = cls.getEnclosingMethod();
+                        if ( em != null )
+                            methodName = em.getName() + ":" + methodName;
+                    }
+                }
+            }
+            catch (Exception e) {
+                // Skip
+            }
+
+            return methodName + " (" + cur.getName() + ")";
         }
         catch (Exception ex) {
             return "";

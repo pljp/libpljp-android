@@ -1,4 +1,4 @@
-version = '1.0-SNAPSHOT'
+version = '0.1.0'
 group = 'jp.programminglife'
 
 buildscript {
@@ -6,11 +6,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.11.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
     }
 }
 
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 android {
