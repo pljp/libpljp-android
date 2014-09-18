@@ -20,15 +20,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import java.util.List;
 
 /**
  * 複数のコールバックメソッドの一括呼び出しを簡単にするクラス。このクラスはスレッドセーフ。
@@ -36,6 +37,12 @@ import android.util.Log;
  */
 public final class CallbackSupport<T> {
 
+    public static <I> CallbackSupport<I> create(Class<I> interfaceClass) {
+        return new CallbackSupport<I>(interfaceClass);
+    }
+
+
+    @Deprecated
     public static <I> CallbackSupport<I> of(Class<I> interfaceClass) {
         return new CallbackSupport<I>(interfaceClass);
     }
@@ -116,19 +123,6 @@ public final class CallbackSupport<T> {
                     callbacks.add(ref);
             }
 
-            // 参照切れになったエントリを除外する。
-
-            @SuppressWarnings("unchecked")
-            WeakReference<T>[] a = callbacks.toArray(new WeakReference[0]);
-            for (WeakReference<T> ref : a) {
-
-                T listener = ref.get();
-                if ( listener == null ) {
-                    callbacks.remove(ref);
-                }
-
-            }
-
         }
 
     }
@@ -179,30 +173,42 @@ public final class CallbackSupport<T> {
 
     private void invokeAll(Method method, Object[] args) {
 
+        List<WeakReference<T>> erasedInstances = null;
+        List<WeakReference<T>> callbacksLocal;
         synchronized (lock) {
-
-            //errors.clear();
-            for (WeakReference<T> ref : callbacks) {
-                try {
-
-                    T callback = ref.get();
-                    if ( callback != null ) {
-                        method.invoke(callback, args);
-                    }
-
-                }
-                /*
-                catch (InvocationTargetException ex) {
-                    errors.add(ex.getCause());
-                }
-                */
-                catch (Exception ex) {
-                    //throw new RuntimeException(ex);
-                    Log.d("CallbackSupport", "", ex);
-                }
-            }
-
+            callbacksLocal = new ArrayList<WeakReference<T>>(callbacks);
         }
+
+        //errors.clear();
+        for (WeakReference<T> ref : callbacksLocal) {
+            try {
+
+                T callback = ref.get();
+                if ( callback != null ) {
+                    method.invoke(callback, args);
+                }
+                else {
+                    if ( erasedInstances == null ) erasedInstances = new ArrayList<WeakReference<T>>();
+                    erasedInstances.add(ref);
+                }
+
+            }
+            /*
+            catch (InvocationTargetException ex) {
+                errors.add(ex.getCause());
+            }
+            */
+            catch (Exception ex) {
+                //throw new RuntimeException(ex);
+                Log.d("CallbackSupport", "", ex);
+            }
+        }
+
+        if ( erasedInstances != null )
+            synchronized (lock) {
+                for (WeakReference<T> ref : erasedInstances)
+                    callbacks.remove(ref);
+            }
 
     }
 
@@ -225,7 +231,6 @@ public final class CallbackSupport<T> {
      * このプロキシのメソッドを呼ぶとリストに登録されたすべてのコールバックオブジェクトのメソッドを呼び出すことができる。
      * ただし、メソッドのリターンを受け取ることはできず、プロキシメソッドは常にnullを返す。
      * 個々のコールバックメソッドが返した例外はgetErrors()メソッドで取得できる。
-     * @return
      */
     @SuppressWarnings("unchecked")
     public T getProxy() {
@@ -237,7 +242,6 @@ public final class CallbackSupport<T> {
      * コールバックのメソッドをメインスレッドで一括で呼び出すためのプロキシを返す。
      * プロキシメソッドを呼ぶと、Handlerを使ってメインスレッドのLooperにpostする。
      * postされた1つのタスクで登録されたコールバックオブジェクトすべてを呼び出す。
-     * @return
      */
     @SuppressWarnings("unchecked")
     public T getMainThreadProxy() {
