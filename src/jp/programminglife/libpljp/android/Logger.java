@@ -22,18 +22,24 @@ package jp.programminglife.libpljp.android;
 
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Method;
 import java.util.Locale;
 
 
 public final class Logger {
 
+    @Nullable
     private static String defaultPrefix;
     private static boolean debug = false;
+
+    @NotNull
     private final String tag;
 
 
-    public static void setPrefix(String prefix) {
+    public static void setPrefix(@Nullable String prefix) {
         defaultPrefix = prefix;
     }
 
@@ -43,27 +49,49 @@ public final class Logger {
     }
 
 
-    public Logger(Class<?> cls) {
+    public Logger(@NotNull Class<?> cls) {
         this(cls, defaultPrefix);
     }
 
 
     /**
-     *
-     * @param cls
-     * @param prefix ログのタグのプレフィックス。prefix + "." + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
+     * @param prefix ログのタグのプレフィックス。prefix + ":" + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
      */
-    public Logger(Class<?> cls, String prefix) {
+    public Logger(@NotNull Class<?> cls, @Nullable String prefix) {
+
+        String className = "";
+        while (true) {
+
+            if ( cls.isMemberClass() ) {
+                className = addClassName(cls.getSimpleName(), className);
+                cls = cls.getDeclaringClass();
+            }
+            else if ( cls.isAnonymousClass() ) {
+
+                Class<?>[] interfaces = cls.getInterfaces();
+                Class<?> superClass = interfaces.length > 0 ? interfaces[0] : cls.getSuperclass();
+                className = addClassName("("+superClass.getSimpleName()+")", className);
+                cls = cls.getEnclosingClass();
+            }
+            else {
+                className = addClassName(cls.getSimpleName(), className);
+                break;
+            }
+        }
 
         if ( prefix != null )
-            tag = prefix + "." + cls.getSimpleName();
+            tag = prefix + ":" + className;
         else
-            tag = cls.getSimpleName();
-
+            tag = className;
     }
 
 
-    public void wtf(String message, Object ... args) {
+    private String addClassName(String enclosingClassName, String className) {
+        return className.length() > 0 ? enclosingClassName + "." + className : enclosingClassName;
+    }
+
+
+    public void wtf(@Nullable String message, Object ... args) {
         Log.wtf(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
@@ -72,12 +100,12 @@ public final class Logger {
      * @deprecated Throwableオブジェクトの出力はセキュリティのため {@link #d(Throwable, String, Object...)}, {@link #v(Throwable, String, Object...)}を使うこと。
      */
     @Deprecated
-    public void wtf(Throwable t, String message, Object ... args) {
+    public void wtf(@Nullable Throwable t, @Nullable String message, Object ... args) {
         Log.wtf(tag, format(message, args), t);
     }
 
 
-    public void e(String message, Object ... args) {
+    public void e(@Nullable String message, Object ... args) {
 
         Log.e(tag, "[" + getMethodName() + "] " + format(message, args));
 
@@ -88,7 +116,7 @@ public final class Logger {
      * @deprecated Throwableオブジェクトの出力はセキュリティのため {@link #d(Throwable, String, Object...)}, {@link #v(Throwable, String, Object...)}を使うこと。
      */
     @Deprecated
-    public void e(Throwable t, String message, Object ... args) {
+    public void e(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
         Log.e(tag, format(message, args), t);
 
@@ -99,7 +127,7 @@ public final class Logger {
      * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
-    public void w(String message, Object ... args) {
+    public void w(@Nullable String message, Object ... args) {
         Log.w(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
@@ -108,7 +136,7 @@ public final class Logger {
      * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
-    public void i(String message, Object ... args) {
+    public void i(@Nullable String message, Object ... args) {
         Log.i(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
@@ -118,7 +146,7 @@ public final class Logger {
      */
     public void d() {
 
-        if ( !BuildConfig.DEBUG ) return;
+        if ( !debug ) return;
         Log.d(tag, "[" + getMethodName() + "] ");
 
     }
@@ -129,7 +157,7 @@ public final class Logger {
      * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
-    public void d(String message, Object ... args) {
+    public void d(@Nullable String message, Object ... args) {
 
         if ( !debug ) return;
         Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
@@ -137,7 +165,7 @@ public final class Logger {
     }
 
 
-    public void d(Throwable t, String message, Object ... args) {
+    public void d(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
         if ( !debug ) return;
         Log.d(tag, "[" + getMethodName() + "] " + format(message, args), t);
@@ -156,7 +184,7 @@ public final class Logger {
     }
 
 
-    public void v(String message, Object ... args) {
+    public void v(@Nullable String message, Object ... args) {
 
         if ( !debug ) return;
         Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
@@ -164,7 +192,7 @@ public final class Logger {
     }
 
 
-    public void v(Throwable t, String message, Object ... args) {
+    public void v(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
         if ( !debug ) return;
         Log.v(tag, "[" + getMethodName() + "] " + format(message, args), t);
@@ -172,7 +200,7 @@ public final class Logger {
     }
 
 
-    private String format(String message, Object... args) {
+    private String format(@Nullable String message, Object... args) {
 
         if ( message == null ) return null;
 
