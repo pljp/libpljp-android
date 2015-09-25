@@ -56,7 +56,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.intellij:annotations:12.0'
     compile 'com.android.tools:annotations:24.3.1'
 }
 

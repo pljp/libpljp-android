@@ -22,8 +22,8 @@ package jp.programminglife.libpljp.android;
 
 import android.util.Log;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.android.annotations.NonNull;
+import com.android.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -35,7 +35,7 @@ public final class Logger {
     private static String defaultPrefix;
     private static boolean debug = false;
 
-    @NotNull
+    @NonNull
     private final String tag;
 
 
@@ -49,7 +49,7 @@ public final class Logger {
     }
 
 
-    public Logger(@NotNull Class<?> cls) {
+    public Logger(@NonNull Class<?> cls) {
         this(cls, defaultPrefix);
     }
 
@@ -57,7 +57,7 @@ public final class Logger {
     /**
      * @param prefix ログのタグのプレフィックス。prefix + ":" + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
      */
-    public Logger(@NotNull Class<?> cls, @Nullable String prefix) {
+    public Logger(@NonNull Class<?> cls, @Nullable String prefix) {
 
         String className = "";
         while (true) {
