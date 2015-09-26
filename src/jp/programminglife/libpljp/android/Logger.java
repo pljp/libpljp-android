@@ -33,7 +33,7 @@ public final class Logger {
 
     @Nullable
     private static String defaultPrefix;
-    private static boolean debug = false;
+    private static LogLevel logLevel = LogLevel.INFO;
 
     @NonNull
     private final String tag;
@@ -44,8 +44,14 @@ public final class Logger {
     }
 
 
+    @Deprecated
     public static void setDebug(boolean debug) {
-        Logger.debug = debug;
+        logLevel = LogLevel.DEBUG;
+    }
+
+
+    public static void setLogLevel(LogLevel l) {
+        logLevel = l;
     }
 
 
@@ -107,7 +113,8 @@ public final class Logger {
 
     public void e(@Nullable String message, Object ... args) {
 
-        Log.e(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( logLevel.compareTo(LogLevel.ERROR) >= 0 )
+            Log.e(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
 
@@ -118,26 +125,27 @@ public final class Logger {
     @Deprecated
     public void e(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
-        Log.e(tag, format(message, args), t);
+        if ( logLevel.compareTo(LogLevel.ERROR) >= 0 )
+            Log.e(tag, format(message, args), t);
 
     }
 
 
     /**
-     * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
     public void w(@Nullable String message, Object ... args) {
-        Log.w(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( logLevel.compareTo(LogLevel.WARN) >= 0 )
+            Log.w(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
 
     /**
-     * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
     public void i(@Nullable String message, Object ... args) {
-        Log.i(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( logLevel.compareTo(LogLevel.INFO) >= 0 )
+            Log.i(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
 
@@ -146,29 +154,28 @@ public final class Logger {
      */
     public void d() {
 
-        if ( !debug ) return;
-        Log.d(tag, "[" + getMethodName() + "] ");
+        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+            Log.d(tag, "[" + getMethodName() + "] ");
 
     }
 
 
     /**
      * BuildConfig.DEBUGがtrueならデフォルトのロケールでString.format()でメッセージを整形してLog.d()で出力する。
-     * @param message
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
     public void d(@Nullable String message, Object ... args) {
 
-        if ( !debug ) return;
-        Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+            Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
 
 
     public void d(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
-        if ( !debug ) return;
-        Log.d(tag, "[" + getMethodName() + "] " + format(message, args), t);
+        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+            Log.d(tag, "[" + getMethodName() + "] " + format(message, args), t);
 
     }
 
@@ -178,24 +185,24 @@ public final class Logger {
      */
     public void v() {
 
-        if ( !debug ) return;
-        Log.v(tag, "[" + getMethodName() + "] ");
+        if ( logLevel == LogLevel.VERBOSE )
+            Log.v(tag, "[" + getMethodName() + "] ");
 
     }
 
 
     public void v(@Nullable String message, Object ... args) {
 
-        if ( !debug ) return;
-        Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
+        if ( logLevel == LogLevel.VERBOSE )
+            Log.v(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
 
 
     public void v(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
-        if ( !debug ) return;
-        Log.v(tag, "[" + getMethodName() + "] " + format(message, args), t);
+        if ( logLevel == LogLevel.VERBOSE )
+            Log.v(tag, "[" + getMethodName() + "] " + format(message, args), t);
 
     }
 
@@ -244,6 +251,11 @@ public final class Logger {
             return "";
         }
 
+    }
+
+
+    public enum LogLevel {
+        VERBOSE, DEBUG, INFO, WARN, ERROR, WTF;
     }
 
 }
