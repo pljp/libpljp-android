@@ -5,9 +5,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.security.SecureRandom;
 import java.util.Calendar;

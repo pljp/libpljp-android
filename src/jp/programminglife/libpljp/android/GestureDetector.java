@@ -4,12 +4,11 @@ package jp.programminglife.libpljp.android;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
-
-import com.android.annotations.NonNull;
 
 import java.lang.ref.WeakReference;
 
