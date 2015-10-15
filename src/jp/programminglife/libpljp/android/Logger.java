@@ -54,7 +54,7 @@ public final class Logger {
 
 
     static {
-        levelMap.put(";", LogLevel.INFO);
+        levelMap.put("", LogLevel.INFO);
     }
 
 
@@ -112,6 +112,7 @@ public final class Logger {
         }
 
         final Lock readLock = lock.readLock();
+        readLock.lock();
         try {
             for (String name : names) {
                 if ( packageOrClassName.startsWith(name) )
