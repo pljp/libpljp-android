@@ -20,23 +20,42 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.android.annotations.NonNull;
-import com.android.annotations.Nullable;
-
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 
+/**
+ * logcatに出力するためのユーティリティクラス。staticメソッドもインスタンスもスレッドセーフ。
+ */
 public final class Logger {
 
     @Nullable
     private static String defaultPrefix;
-    private static LogLevel logLevel = LogLevel.INFO;
+    private static final Map<String, LogLevel> levelMap = new HashMap<>();
+    private static List<String> names;
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
     @NonNull
     private final String tag;
+    @NonNull
+    private final LogLevel logLevel;
+
+
+    static {
+        levelMap.put(";", LogLevel.INFO);
+    }
 
 
     public static void setPrefix(@Nullable String prefix) {
@@ -46,12 +65,64 @@ public final class Logger {
 
     @Deprecated
     public static void setDebug(boolean debug) {
-        logLevel = LogLevel.DEBUG;
+        setDefaultLogLevel(debug ? LogLevel.DEBUG : LogLevel.INFO);
     }
 
 
-    public static void setLogLevel(LogLevel l) {
-        logLevel = l;
+    public static void setDefaultLogLevel(@NonNull LogLevel l) {
+        setLogLevel("", l);
+    }
+
+
+    /**
+     * ログレベルを設定する。設定したログレベルはこの名前で始まるすべてのクラスに有効。
+     * クラス名に対して文字列の前方一致だけで適用されることに注意。また、設定はより長くマッチする名前が優先される。
+     * 例) a.b.Fooの設定は クラスa.b.FooTest にもマッチする。a.b.Fooにはaよりもa.bの方が優先的にマッチする。
+     * @param packageOrClassName パッケージ名またはクラスの完全修飾名。
+     * @param level 設定するログレベル。
+     */
+    public static void setLogLevel(@NonNull String packageOrClassName, @NonNull LogLevel level) {
+
+        final Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        try {
+            levelMap.put(packageOrClassName, level);
+            names = null;
+        }
+        finally {
+            writeLock.unlock();
+        }
+
+    }
+
+
+    private static LogLevel getLogLevel(String packageOrClassName) {
+
+        final Lock writeLock = lock.writeLock();
+        writeLock.lock();
+        try {
+            if ( names == null ) {
+                names = new ArrayList<>(levelMap.keySet());
+                Collections.sort(names);
+                Collections.reverse(names);
+            }
+        }
+        finally {
+            writeLock.unlock();
+        }
+
+        final Lock readLock = lock.readLock();
+        try {
+            for (String name : names) {
+                if ( packageOrClassName.startsWith(name) )
+                    return levelMap.get(name);
+            }
+            return levelMap.get("");
+        }
+        finally {
+            readLock.unlock();
+        }
+
     }
 
 
@@ -61,10 +132,13 @@ public final class Logger {
 
 
     /**
+     * ロガーのインスタンスを作る。先に出力レベルの設定を行っておくこと。
+     * 設定が参照されるのはロガーのインスタンス作成時だけなので注意。
      * @param prefix ログのタグのプレフィックス。prefix + ":" + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
      */
     public Logger(@NonNull Class<?> cls, @Nullable String prefix) {
 
+        logLevel = getLogLevel(cls.getName());
         String className = "";
         while (true) {
 
