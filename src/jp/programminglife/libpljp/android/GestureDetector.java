@@ -93,6 +93,14 @@ public final class GestureDetector {
     }
 
 
+    /**
+     * ポインター数を返す。
+     */
+    public int getPointerCount() {
+        return detectors.size();
+    }
+
+
     private void removeSingle(int id) {
 
         log.v("remove Single id:%d", id);
