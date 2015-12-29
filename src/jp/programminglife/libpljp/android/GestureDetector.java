@@ -2,9 +2,11 @@ package jp.programminglife.libpljp.android;
 
 
 import android.content.Context;
+import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -27,20 +29,29 @@ public final class GestureDetector {
     static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
     static final int DOUBLE_TAP_TIMEOUT = ViewConfiguration.getDoubleTapTimeout();
     static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    /** 単体ポインタージェスチャーの最大数。スケールイベントのポインター数には影響しない。 */
     public int maxPointers;
     final Logger log = new Logger(getClass());
     final int doubleTapSlopSquare;
     final int touchSlopSquare;
     final float maxFlingVelocity;
     final float minFlingVelocitySquare;
-    private final SparseArray<Detector> detectors = new SparseArray<>();
+    private ScaleGestureDetector scaleGestureDetector;
+    private final SparseArray<SinglePointerDetector> detectors = new SparseArray<>();
     private final Handler_ handler;
     private OnDownListener onDownListener;
 
 
     public GestureDetector(@NonNull Context context, @NonNull OnDownListener onDownListener) {
+        this(context, onDownListener, null);
+    }
+
+
+    public GestureDetector(@NonNull Context context, @NonNull OnDownListener onDownListener, ScaleGestureListener scaleGestureListener) {
 
         this.onDownListener = onDownListener;
+        if ( scaleGestureListener != null )
+            scaleGestureDetector = new ScaleGestureDetector(scaleGestureListener);
         ViewConfiguration viewConf = ViewConfiguration.get(context);
         doubleTapSlopSquare = viewConf.getScaledDoubleTapSlop() * viewConf.getScaledDoubleTapSlop();
         touchSlopSquare = viewConf.getScaledTouchSlop() * viewConf.getScaledTouchSlop();
@@ -60,8 +71,15 @@ public final class GestureDetector {
         int index = e.getActionIndex();
         int id = e.getPointerId(index);
         int actionMasked = e.getActionMasked();
-        Detector detector = detectors.get(id);
+        SinglePointerDetector detector = detectors.get(id);
         //log.v("pointer id:%d, action:%d, single:%s, x:%.1f, y:%.1f, index:%d, p.count:%d", id, actionMasked, single, e.getX(index), e.getY(index), index, e.getPointerCount());
+
+        if ( scaleGestureDetector != null && scaleGestureDetector.onTouchEvent(e, id) ) {
+
+            clearSingleDetectors();
+            return true;
+
+        }
 
         if ( (actionMasked == ACTION_DOWN || actionMasked == ACTION_POINTER_DOWN ) && detector == null ) {
 
@@ -69,7 +87,7 @@ public final class GestureDetector {
                 log.v("EVENT: down - id:%d", id);
                 final GestureListener gestureListener = onDownListener.onDown(e, id);
                 log.v("new Single id:%d", id);
-                detector = new Detector(id, e, gestureListener);
+                detector = new SinglePointerDetector(id, e, gestureListener);
                 detectors.put(id, detector);
             }
             else {
@@ -93,10 +111,30 @@ public final class GestureDetector {
     }
 
 
+    /**
+     * ポインター数を返す。
+     */
+    public int getPointerCount() {
+        return detectors.size();
+    }
+
+
+    private void clearSingleDetectors() {
+
+        //log.v();
+        int n = detectors.size();
+        if ( n == 0 ) return;
+        for (int i = 0; i < n; i++)
+            detectors.get(detectors.keyAt(i)).dispose();
+        detectors.clear();
+
+    }
+
+
     private void removeSingle(int id) {
 
         log.v("remove Single id:%d", id);
-        final Detector detector = detectors.get(id);
+        final SinglePointerDetector detector = detectors.get(id);
         if ( detector != null ) {
             detector.dispose();
             detectors.remove(id);
@@ -105,7 +143,7 @@ public final class GestureDetector {
     }
 
 
-    final class Detector {
+    final class SinglePointerDetector {
 
         final Logger log = new Logger(getClass());
         final GestureDetector gesture;
@@ -125,7 +163,7 @@ public final class GestureDetector {
         private int count;
         private VelocityTracker velocityTracker;
 
-        public Detector(int id, @NonNull MotionEvent firstDown, @NonNull GestureListener gestureListener) {
+        public SinglePointerDetector(int id, @NonNull MotionEvent firstDown, @NonNull GestureListener gestureListener) {
 
             this.id = id;
             listener = gestureListener;
@@ -139,13 +177,13 @@ public final class GestureDetector {
 
         void sendMessage(int what, long time) {
             //log.v("what:%d, time:%s", what, new Date(time).toString());
-            handler.sendMessageAtTime(Message.obtain(handler, what, Detector.this), time);
+            handler.sendMessageAtTime(Message.obtain(handler, what, SinglePointerDetector.this), time);
         }
 
 
         void removeMessage(int what) {
             //log.v("what:%d", what);
-            if ( handler.hasMessages(what, Detector.this) ) handler.removeMessages(what, Detector.this);
+            if ( handler.hasMessages(what, SinglePointerDetector.this) ) handler.removeMessages(what, SinglePointerDetector.this);
         }
 
 
@@ -157,8 +195,13 @@ public final class GestureDetector {
                 velocityTracker.clear();
             }
             velocityTracker.addMovement(e);
+            changeMode(mode.onTouchEvent(this, e));
 
-            final Mode newMode = mode.onTouchEvent(this, e);
+        }
+
+
+        private void changeMode(@Nullable Mode newMode) {
+
             if ( newMode != null && mode != newMode ) {
 
                 log.v("mode %s -> %s", mode, newMode);
@@ -178,6 +221,11 @@ public final class GestureDetector {
 
         void dispose() {
 
+            if ( mode != Mode.END ) {
+                mode.cancel(this);
+                mode = Mode.END;
+            }
+            listener.onRelease();
             firstDown.recycle();
             if ( lastDown != null )
                 lastDown.recycle();
@@ -186,7 +234,6 @@ public final class GestureDetector {
             velocityTracker.recycle();
             velocityTracker = null;
 
-            mode = Mode.END;
             removeMessage(TAP_CONFIRMED);
             removeMessage(LONG_TAP);
 
@@ -199,14 +246,14 @@ public final class GestureDetector {
 
         DOWN {
             @Override
-            void start(Detector detector) {
+            void start(SinglePointerDetector detector) {
                 detector.removeMessage(TAP_CONFIRMED);
                 detector.sendMessage(LONG_TAP, detector.lastDown.getEventTime() + LONG_PRESS_TIMEOUT);
             }
 
 
             @Override
-            Mode onTouchEvent(final Detector d, final MotionEvent e) {
+            Mode onTouchEvent(final SinglePointerDetector d, final MotionEvent e) {
 
                 final Logger log = d.log;
                 final GestureDetector g = d.gesture;
@@ -252,14 +299,14 @@ public final class GestureDetector {
 
         UP {
             @Override
-            Mode onTouchEvent(Detector detector, MotionEvent e) {
+            Mode onTouchEvent(SinglePointerDetector detector, MotionEvent e) {
                 return detector.actionMasked == ACTION_DOWN ? DOWN : null;
             }
         },
 
         DRAG {
             @Override
-            void start(Detector detector) {
+            void start(SinglePointerDetector detector) {
 
                 final MotionEvent firstDown = detector.firstDown;
                 detector.log.v("EVENT: drag start - id:%d, count:%d", detector.id, detector.count);
@@ -271,7 +318,7 @@ public final class GestureDetector {
 
 
             @Override
-            Mode onTouchEvent(final Detector detector, final MotionEvent e) {
+            Mode onTouchEvent(final SinglePointerDetector detector, final MotionEvent e) {
 
                 if ( detector.actionMasked == ACTION_MOVE ) {
 
@@ -312,28 +359,193 @@ public final class GestureDetector {
                 return null;
 
             }
+
+
+            @Override
+            void cancel(SinglePointerDetector detector) {
+                detector.listener.onDragCancel(detector.firstDown);
+            }
         },
 
         END;
 
         /** モードが移ったときに呼ばれる。 */
-        void start(Detector detector) {}
+        void start(SinglePointerDetector detector) {}
         /** 次のモードに移る前に呼ばれる。 */
-        void end(Detector detector) {}
+        void end(SinglePointerDetector detector) {}
+        /** モードがキャンセルされた(次のモードに移らずに終了した)ときに呼ばれる。 */
+        void cancel(SinglePointerDetector detector) {}
         /**
          * タッチイベントの処理。
          * @return 次のモード。nullならモードが移らない。
          */
-        Mode onTouchEvent(Detector detector, MotionEvent e) {return null;}
+        Mode onTouchEvent(SinglePointerDetector detector, MotionEvent e) {return null;}
+    }
+
+
+    public final class ScaleGestureDetector {
+
+        private final Logger log = new Logger(ScaleGestureDetector.class);
+        private final ScaleGestureListener listener;
+        private final SparseArray<PointF> curPoints = new SparseArray<>(2);
+        private final SparseArray<PointF> prevPoints = new SparseArray<>(2);
+
+
+        public ScaleGestureDetector(ScaleGestureListener listener) {
+            this.listener = listener;
+        }
+
+
+        public boolean onTouchEvent(MotionEvent e, int id) {
+
+            final int actionMasked = e.getActionMasked();
+            boolean ret = false;
+            //log.v("MotionEvent id=%d, xy=(%.1f, %.1f)", id, e.getX(), e.getY());
+            if ( actionMasked == ACTION_DOWN || actionMasked == ACTION_POINTER_DOWN ) {
+
+                // 3つめ以降のポインターは追加せずにイベントを消費する。
+                if ( curPoints.size() == 2 ) {
+                    ret = true;
+                    log.v("3つ目のポインター id=%d", id);
+                }
+                // ポインターが0か1個のときは追加する。
+                else {
+                    curPoints.put(id, new PointF());
+                    log.v("%dつめのポインター id=%d", curPoints.size(), id);
+                    updatePoints(e);
+                    // ポインターが2つになったらリスナーに通知する。
+                    if ( curPoints.size() == 2 ) {
+                        updatePoints(e); // prevPointsにcurPointsをコピーするために呼び出す。
+                        listener.onScaleBegin(this);
+                        ret = true;
+                    }
+                }
+
+            }
+            else if ( actionMasked == ACTION_UP || actionMasked == ACTION_POINTER_UP ) {
+
+                log.v("UP id=%d", id);
+                updatePoints(e);
+                // ポインターの削除に成功して1つになったら通知する。
+                final boolean removed = curPoints.indexOfKey(id) >= 0;
+                curPoints.delete(id);
+                if ( removed && curPoints.size() == 1 ) {
+                    log.v("スケールジェスチャー終了");
+                    listener.onScaleEnd(this);
+                    // スケールジェスチャーを繰り返しても同じIDが使われるのでcurPoints, prevPointsが大きくなることはないが
+                    // もし増大したならクリアする
+                    if ( curPoints.size() > 2 )
+                        curPoints.clear();
+                    if ( prevPoints.size() > 2 )
+                        prevPoints.clear();
+                    ret = true;
+                }
+
+            }
+            else if ( actionMasked == ACTION_MOVE ) {
+
+                updatePoints(e);
+                if ( curPoints.size() == 2 ) {
+                    listener.onScale(this);
+                    ret = true;
+                }
+
+            }
+
+            return ret;
+
+        }
+
+
+        private void updatePoints(MotionEvent e) {
+
+            // curからprevにポイントをコピーする
+
+            for (int i = 0, n = curPoints.size(); i < n; i++) {
+
+                final int key = curPoints.keyAt(i);
+                final PointF value = curPoints.valueAt(i);
+                if ( prevPoints.indexOfKey(key) < 0 )
+                    prevPoints.put(key, new PointF(value.x, value.y));
+                else
+                    prevPoints.get(key).set(value);
+
+            }
+
+            // curを更新する
+
+            for (int i=0, n=e.getPointerCount(); i<n; i++) {
+
+                final int id = e.getPointerId(i);
+                final PointF p = curPoints.get(id);
+                if ( p != null ) {
+                    p.set(e.getX(i), e.getY(i));
+                    //log.v("point%d id=%d, %s", i, id, p);
+                }
+
+            }
+
+            //log.v("p1=%s, p2=%s", curPoints[0].toString(), curPoints[1].toString());
+
+        }
+
+
+        public float getFocusX() {
+            if ( curPoints.size() < 2 ) return 0;
+            final PointF p1 = curPoints.valueAt(0);
+            final PointF p2 = curPoints.valueAt(1);
+            return (p1.x + p2.x) / 2.f;
+        }
+
+
+        public float getFocusY() {
+            if ( curPoints.size() < 2 ) return 0;
+            final PointF p1 = curPoints.valueAt(0);
+            final PointF p2 = curPoints.valueAt(1);
+            return (p1.y + p2.y) / 2.f;
+        }
+
+
+        public float getPreviousFocusX() {
+            if ( prevPoints.size() < 2 ) return 0;
+            final PointF p1 = prevPoints.valueAt(0);
+            final PointF p2 = prevPoints.valueAt(1);
+            return (p1.x + p2.x) / 2.f;
+        }
+
+
+        public float getPreviousFocusY() {
+            if ( prevPoints.size() < 2 ) return 0;
+            final PointF p1 = prevPoints.valueAt(0);
+            final PointF p2 = prevPoints.valueAt(1);
+            return (p1.y + p2.y) / 2.f;
+        }
+
+
+        public float getSpan() {
+            if ( curPoints.size() < 2 ) return 1.f;
+            final PointF p1 = curPoints.valueAt(0);
+            final PointF p2 = curPoints.valueAt(1);
+            return PointF.length(p2.x - p1.x, p2.y - p1.y);
+        }
+
+
+        public float getPreviousSpan() {
+            if ( prevPoints.size() < 2 ) return 1.f;
+            final PointF p1 = prevPoints.valueAt(0);
+            final PointF p2 = prevPoints.valueAt(1);
+            return PointF.length(p2.x - p1.x, p2.y - p1.y);
+        }
+
     }
 
 
     public interface OnDownListener {
         /**
-         * ゼスチャーの追跡を開始を通知する。ダブルタップの場合でも最初のdownのみを通知する。
+         * ジェスチャーの追跡を開始を通知する。ダブルタップの場合でも最初のdownのみを通知する。
          * @param e ACTION_DOWNイベント。
          * @param id ポインターID。
-         * @return 続くゼスチャーイベントを受け取るリスナー。
+         * @return 続くジェスチャーイベントを受け取るリスナー。
          */
         GestureListener onDown(MotionEvent e, int id);
     }
@@ -389,11 +601,35 @@ public final class GestureDetector {
 
 
         /**
+         * ドラッグがキャンセルされたときに通知ばれる。
+         * @param e 最初のDOWNイベント。
+         */
+        public void onDragCancel(MotionEvent e) {}
+
+
+        /**
          * 長押ししたときに通知される。
          * @param e 最初のDOWNイベント。
          * @param count タッチして離した回数。最初のタッチで長押ししたときは0。
          */
         public void onLongPress(MotionEvent e, int count) {}
+
+
+        /**
+         * リスナーが解放されるときに呼ばれる。
+         */
+        public void onRelease() {}
+
+    }
+
+
+    public static class ScaleGestureListener {
+
+        public void onScaleBegin(ScaleGestureDetector detector) {}
+
+        public void onScale(ScaleGestureDetector detector) {}
+
+        public void onScaleEnd(ScaleGestureDetector detector) {}
 
     }
 
@@ -416,7 +652,7 @@ public final class GestureDetector {
             final GestureDetector g = gesture.get();
             if ( g == null ) return;
 
-            final Detector detector = msg.obj instanceof Detector ? (Detector)msg.obj : null;
+            final SinglePointerDetector detector = msg.obj instanceof SinglePointerDetector ? (SinglePointerDetector)msg.obj : null;
             if ( detector != null && detector.isTracking() ) {
                 switch (msg.what) {
 
