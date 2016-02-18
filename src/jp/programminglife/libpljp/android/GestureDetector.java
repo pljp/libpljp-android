@@ -31,7 +31,7 @@ public final class GestureDetector {
     static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     /** 単体ポインタージェスチャーの最大数。スケールイベントのポインター数には影響しない。 */
     public int maxPointers;
-    final Logger log = new Logger(getClass());
+    final Logger log = Logger.create(getClass());
     final int doubleTapSlopSquare;
     final int touchSlopSquare;
     final float maxFlingVelocity;
@@ -145,7 +145,7 @@ public final class GestureDetector {
 
     final class SinglePointerDetector {
 
-        final Logger log = new Logger(getClass());
+        final Logger log = Logger.create(getClass());
         final GestureDetector gesture;
         final int id;
         @NonNull
@@ -255,7 +255,6 @@ public final class GestureDetector {
             @Override
             Mode onTouchEvent(final SinglePointerDetector d, final MotionEvent e) {
 
-                final Logger log = d.log;
                 final GestureDetector g = d.gesture;
                 final MotionEvent lastDown = d.lastDown;
                 if ( d.actionMasked == ACTION_MOVE ) {
@@ -309,7 +308,7 @@ public final class GestureDetector {
             void start(SinglePointerDetector detector) {
 
                 final MotionEvent firstDown = detector.firstDown;
-                detector.log.v("EVENT: drag start - id:%d, count:%d", detector.id, detector.count);
+                log.v("EVENT: drag start - id:%d, count:%d", detector.id, detector.count);
                 detector.listener.onDragStart(firstDown, detector.count);
                 detector.lastX = firstDown.getX();
                 detector.lastY = firstDown.getY();
@@ -339,17 +338,17 @@ public final class GestureDetector {
                     final float vx = velocityTracker.getXVelocity(detector.id);
                     final float vy = velocityTracker.getYVelocity(detector.id);
                     final float velocitySquare = vx * vx + vy * vy;
-                    detector.log.v("id:%d, velocity:%f, vx:%f, vy:%f, minFlingVelocity:%f",
+                    log.v("id:%d, velocity:%f, vx:%f, vy:%f, minFlingVelocity:%f",
                             detector.id,
                             (float)Math.sqrt(velocitySquare),
                             vx, vy,
                             (float)Math.sqrt(detector.gesture.minFlingVelocitySquare));
                     if ( velocitySquare < detector.gesture.minFlingVelocitySquare ) {
-                        detector.log.v("EVENT: drag end - id:%d", detector.id);
+                        log.v("EVENT: drag end - id:%d", detector.id);
                         detector.listener.onDragEnd(e);
                     }
                     else {
-                        detector.log.v("EVENT: fling - id:%d", detector.id, vx, vy);
+                        log.v("EVENT: fling - id:%d", detector.id, vx, vy);
                         detector.listener.onFling(detector.firstDown, e, vx, vy);
                     }
 
@@ -363,12 +362,14 @@ public final class GestureDetector {
 
             @Override
             void cancel(SinglePointerDetector detector) {
+                log.v("cancel drag");
                 detector.listener.onDragCancel(detector.firstDown);
             }
         },
 
         END;
 
+        final Logger log = Logger.create(Mode.class);
         /** モードが移ったときに呼ばれる。 */
         void start(SinglePointerDetector detector) {}
         /** 次のモードに移る前に呼ばれる。 */
@@ -385,7 +386,7 @@ public final class GestureDetector {
 
     public final class ScaleGestureDetector {
 
-        private final Logger log = new Logger(ScaleGestureDetector.class);
+        private final Logger log = Logger.create(ScaleGestureDetector.class);
         private final ScaleGestureListener listener;
         private final SparseArray<PointF> curPoints = new SparseArray<>(2);
         private final SparseArray<PointF> prevPoints = new SparseArray<>(2);
@@ -636,7 +637,7 @@ public final class GestureDetector {
 
     private static final class Handler_ extends Handler {
 
-        private final Logger log = new Logger(getClass());
+        private final Logger log = Logger.create(getClass());
         private WeakReference<GestureDetector> gesture;
 
 
