@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.IdentityHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -41,25 +41,24 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class Logger {
 
-    @Nullable
-    private static String defaultPrefix;
-    private static final Map<String, LogLevel> levelMap = new HashMap<>();
-    private static List<String> names;
-    private static final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
+    private static final Map<String, LogLevel> levelConfig = new HashMap<>();
+    private static final ReadWriteLock lock = new ReentrantReadWriteLock(false);
+    private static final Map<Class<?>, Logger> instances = new IdentityHashMap<>();
+    @Nullable
+    private static volatile String prefix;
     @NonNull
     private final String tag;
     @NonNull
     private final LogLevel logLevel;
 
-
     static {
-        levelMap.put("", LogLevel.INFO);
+        levelConfig.put("", LogLevel.INFO);
     }
 
 
     public static void setPrefix(@Nullable String prefix) {
-        defaultPrefix = prefix;
+        Logger.prefix = prefix;
     }
 
 
@@ -85,40 +84,27 @@ public final class Logger {
 
         final Lock writeLock = lock.writeLock();
         writeLock.lock();
-        try {
-            levelMap.put(packageOrClassName, level);
-            names = null;
-        }
-        finally {
-            writeLock.unlock();
-        }
+        levelConfig.put(packageOrClassName, level);
+        writeLock.unlock();
 
     }
 
 
+    @NonNull
     private static LogLevel getLogLevel(String packageOrClassName) {
-
-        final Lock writeLock = lock.writeLock();
-        writeLock.lock();
-        try {
-            if ( names == null ) {
-                names = new ArrayList<>(levelMap.keySet());
-                Collections.sort(names);
-                Collections.reverse(names);
-            }
-        }
-        finally {
-            writeLock.unlock();
-        }
 
         final Lock readLock = lock.readLock();
         readLock.lock();
         try {
+
+            final ArrayList<String> names = new ArrayList<>(levelConfig.keySet());
+            Collections.sort(names);
+            Collections.reverse(names);
             for (String name : names) {
                 if ( packageOrClassName.startsWith(name) )
-                    return levelMap.get(name);
+                    return levelConfig.get(name);
             }
-            return levelMap.get("");
+            return levelConfig.get("");
         }
         finally {
             readLock.unlock();
@@ -127,48 +113,126 @@ public final class Logger {
     }
 
 
-    public Logger(@NonNull Class<?> cls) {
-        this(cls, defaultPrefix);
+    private static String getTag(final Class<?> cls) {
+
+        final Lock readLock = Logger.lock.readLock();
+        readLock.lock();
+        try {
+
+            // タグ文字列を生成
+
+            String className = "";
+            Class<?> curCls = cls;
+            while (true) {
+
+                if ( curCls.isMemberClass() ) {
+                    className = addClassName(curCls.getSimpleName(), className);
+                    curCls = curCls.getDeclaringClass();
+                }
+                else if ( curCls.isAnonymousClass() ) {
+
+                    Class<?>[] interfaces = curCls.getInterfaces();
+                    Class<?> superClass = interfaces.length > 0 ? interfaces[0] : curCls.getSuperclass();
+                    className = addClassName("("+superClass.getSimpleName()+")", className);
+                    curCls = curCls.getEnclosingClass();
+                }
+                else {
+                    className = addClassName(curCls.getSimpleName(), className);
+                    break;
+                }
+            }
+
+            final String tag;
+            if ( prefix != null )
+                tag = prefix + ":" + className;
+            else
+                tag = className;
+            return tag;
+
+        }
+        finally {
+            readLock.unlock();
+        }
+
+    }
+
+
+    private static String addClassName(String enclosingClassName, String className) {
+        return className.length() > 0 ? enclosingClassName + "." + className : enclosingClassName;
+    }
+
+
+    @NonNull
+    public static Logger create(@NonNull final Class<?> cls) {
+
+        // キャッシュにあればそれを返す
+
+        Logger logger;
+        final Lock readLock = lock.readLock();
+        readLock.lock();
+        try {
+            logger = instances.get(cls);
+            if ( logger != null ) {
+                //Log.v("Logger", "hit: class="+cls.toString());
+                return logger;
+            }
+        }
+        finally {
+            readLock.unlock();
+        }
+
+        // 新しいLoggerをキャッシュに入れる
+
+        final Lock writeLock = Logger.lock.writeLock();
+        writeLock.lock();
+        try {
+
+            // ロックを得るまでにキャッシュが更新されているかもしれないので、もう一度キャッシュを確認
+            logger = instances.get(cls);
+            if ( logger != null )
+                return logger;
+
+            final String tag = getTag(cls);
+            final LogLevel logLevel = getLogLevel(cls.getName());
+            logger = new Logger(tag, logLevel);
+            //Log.v("Logger", "put: class="+cls.toString());
+            instances.put(cls, logger);
+            return logger;
+
+        }
+        finally {
+            writeLock.unlock();
+        }
+
     }
 
 
     /**
      * ロガーのインスタンスを作る。先に出力レベルの設定を行っておくこと。
      * 設定が参照されるのはロガーのインスタンス作成時だけなので注意。
-     * @param prefix ログのタグのプレフィックス。prefix + ":" + cls.getSimpleName() がタグになる。nullを指定するとプレフィックスなしになる。
+     * @deprecated staticメソッドを使う。
      */
-    public Logger(@NonNull Class<?> cls, @Nullable String prefix) {
-
+    @Deprecated
+    public Logger(@NonNull Class<?> cls) {
         logLevel = getLogLevel(cls.getName());
-        String className = "";
-        while (true) {
-
-            if ( cls.isMemberClass() ) {
-                className = addClassName(cls.getSimpleName(), className);
-                cls = cls.getDeclaringClass();
-            }
-            else if ( cls.isAnonymousClass() ) {
-
-                Class<?>[] interfaces = cls.getInterfaces();
-                Class<?> superClass = interfaces.length > 0 ? interfaces[0] : cls.getSuperclass();
-                className = addClassName("("+superClass.getSimpleName()+")", className);
-                cls = cls.getEnclosingClass();
-            }
-            else {
-                className = addClassName(cls.getSimpleName(), className);
-                break;
-            }
-        }
-
-        if ( prefix != null )
-            tag = prefix + ":" + className;
-        else
-            tag = className;
+        tag = getTag(cls);
     }
 
 
-    private String addClassName(String enclosingClassName, String className) {
-        return className.length() > 0 ? enclosingClassName + "." + className : enclosingClassName;
+    /**
+     * ロガーのインスタンスを作る。先に出力レベルの設定を行っておくこと。
+     * 設定が参照されるのはロガーのインスタンス作成時だけなので注意。
+     * @param prefix 無視される
+     */
+    @Deprecated
+    public Logger(@NonNull Class<?> cls, @Nullable String prefix) {
+        this(cls);
+    }
+
+
+    private Logger(@NonNull  String tag, @NonNull  LogLevel logLevel) {
+        this.tag = tag;
+        this.logLevel = logLevel;
     }
 
 
