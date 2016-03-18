@@ -252,7 +252,7 @@ public final class Logger {
 
     public void e(@Nullable String message, Object ... args) {
 
-        if ( logLevel.compareTo(LogLevel.ERROR) >= 0 )
+        if ( logLevel.compareTo(LogLevel.ERROR) <= 0 )
             Log.e(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
@@ -264,7 +264,7 @@ public final class Logger {
     @Deprecated
     public void e(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
-        if ( logLevel.compareTo(LogLevel.ERROR) >= 0 )
+        if ( logLevel.compareTo(LogLevel.ERROR) <= 0 )
             Log.e(tag, format(message, args), t);
 
     }
@@ -274,7 +274,7 @@ public final class Logger {
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
     public void w(@Nullable String message, Object ... args) {
-        if ( logLevel.compareTo(LogLevel.WARN) >= 0 )
+        if ( logLevel.compareTo(LogLevel.WARN) <= 0 )
             Log.w(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
@@ -283,7 +283,7 @@ public final class Logger {
      * @param args String.format()に渡す引数。1つもなければフォーマットせずにそのまま出力する。
      */
     public void i(@Nullable String message, Object ... args) {
-        if ( logLevel.compareTo(LogLevel.INFO) >= 0 )
+        if ( logLevel.compareTo(LogLevel.INFO) <= 0 )
             Log.i(tag, "[" + getMethodName() + "] " + format(message, args));
     }
 
@@ -293,7 +293,7 @@ public final class Logger {
      */
     public void d() {
 
-        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+        if ( logLevel.compareTo(LogLevel.DEBUG) <= 0 )
             Log.d(tag, "[" + getMethodName() + "] ");
 
     }
@@ -305,7 +305,7 @@ public final class Logger {
      */
     public void d(@Nullable String message, Object ... args) {
 
-        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+        if ( logLevel.compareTo(LogLevel.DEBUG) <= 0 )
             Log.d(tag, "[" + getMethodName() + "] " + format(message, args));
 
     }
@@ -313,7 +313,7 @@ public final class Logger {
 
     public void d(@Nullable Throwable t, @Nullable String message, Object ... args) {
 
-        if ( logLevel.compareTo(LogLevel.DEBUG) >= 0 )
+        if ( logLevel.compareTo(LogLevel.DEBUG) <= 0 )
             Log.d(tag, "[" + getMethodName() + "] " + format(message, args), t);
 
     }
