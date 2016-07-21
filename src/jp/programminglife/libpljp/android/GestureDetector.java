@@ -31,7 +31,7 @@ public final class GestureDetector {
     static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     /** 単体ポインタージェスチャーの最大数。スケールイベントのポインター数には影響しない。 */
     public int maxPointers;
-    final Logger log = Logger.create(getClass());
+    final Logger log = Logger.get(getClass());
     final int doubleTapSlopSquare;
     final int touchSlopSquare;
     final float maxFlingVelocity;
@@ -145,7 +145,7 @@ public final class GestureDetector {
 
     final class SinglePointerDetector {
 
-        final Logger log = Logger.create(getClass());
+        final Logger log = Logger.get(getClass());
         final GestureDetector gesture;
         final int id;
         @NonNull
@@ -162,6 +162,7 @@ public final class GestureDetector {
         /** 連続タップしたカウント。 */
         private int count;
         private VelocityTracker velocityTracker;
+        private boolean longPress;
 
         public SinglePointerDetector(int id, @NonNull MotionEvent firstDown, @NonNull GestureListener gestureListener) {
 
@@ -190,7 +191,7 @@ public final class GestureDetector {
         void onTouchEvent(MotionEvent e) {
 
             actionMasked = e.getActionMasked();
-            if ( actionMasked == ACTION_DOWN ) {
+            if ( actionMasked == ACTION_DOWN || actionMasked == ACTION_POINTER_DOWN ) {
                 lastDown = MotionEvent.obtain(e);
                 velocityTracker.clear();
             }
@@ -225,7 +226,7 @@ public final class GestureDetector {
                 mode.cancel(this);
                 mode = Mode.END;
             }
-            listener.onRelease();
+            listener.onReleaseListener();
             firstDown.recycle();
             if ( lastDown != null )
                 lastDown.recycle();
@@ -276,19 +277,35 @@ public final class GestureDetector {
                     final float dx = firstDown.getX() - lastDown.getX();
                     final float dy = firstDown.getY() - lastDown.getY();
                     d.count++;
+                    Mode ret = UP;
                     if ( d.count >= 2 && dx * dx + dy * dy > g.doubleTapSlopSquare ) {
 
-                        log.v("EVENT: tap confirmed (連続タップ失敗) - count:%d, id:%d", d.count-1, d.id);
-                        d.listener.onTapConfirmed(firstDown, d.count - 1);
+                        if ( d.longPress ) {
+                            log.v("EVENT: long tap (連続タップ失敗) - count:%d, id:%d", d.count-1, d.id);
+                            d.listener.onLongTap(firstDown, d.count - 1);
+                        }
+                        else {
+                            log.v("EVENT: tap confirmed (連続タップ失敗) - count:%d, id:%d", d.count-1, d.id);
+                            d.listener.onTapConfirmed(firstDown, d.count - 1);
+                        }
                         d.count = 1;
+                        ret = END;
 
                     }
-
-                    log.v("EVENT: tap - count:%d, id:%d", d.count, d.id);
-                    d.listener.onTap(lastDown, d.count);
-                    d.sendMessage(TAP_CONFIRMED, e.getEventTime() + GestureDetector.DOUBLE_TAP_TIMEOUT);
+                    else {
+                        if ( d.longPress ) {
+                            log.v("EVENT: long tap - count:%d, id:%d", d.count, d.id);
+                            d.listener.onLongTap(firstDown, d.count);
+                            ret = END;
+                        }
+                        else {
+                            log.v("EVENT: tap - count:%d, id:%d", d.count, d.id);
+                            d.listener.onTap(lastDown, d.count);
+                        }
+                        d.sendMessage(TAP_CONFIRMED, e.getEventTime() + GestureDetector.DOUBLE_TAP_TIMEOUT);
+                    }
                     d.removeMessage(LONG_TAP);
-                    return UP;
+                    return ret;
 
                 }
                 return null;
@@ -299,7 +316,7 @@ public final class GestureDetector {
         UP {
             @Override
             Mode onTouchEvent(SinglePointerDetector detector, MotionEvent e) {
-                return detector.actionMasked == ACTION_DOWN ? DOWN : null;
+                return detector.actionMasked == ACTION_DOWN || detector.actionMasked == ACTION_POINTER_DOWN ? DOWN : null;
             }
         },
 
@@ -309,7 +326,7 @@ public final class GestureDetector {
 
                 final MotionEvent firstDown = detector.firstDown;
                 log.v("EVENT: drag start - id:%d, count:%d", detector.id, detector.count);
-                detector.listener.onDragStart(firstDown, detector.count);
+                detector.listener.onDragStart(firstDown, detector.count, detector.longPress);
                 detector.lastX = firstDown.getX();
                 detector.lastY = firstDown.getY();
 
@@ -369,7 +386,7 @@ public final class GestureDetector {
 
         END;
 
-        final Logger log = Logger.create(Mode.class);
+        final Logger log = Logger.get(Mode.class);
         /** モードが移ったときに呼ばれる。 */
         void start(SinglePointerDetector detector) {}
         /** 次のモードに移る前に呼ばれる。 */
@@ -386,7 +403,7 @@ public final class GestureDetector {
 
     public final class ScaleGestureDetector {
 
-        private final Logger log = Logger.create(ScaleGestureDetector.class);
+        private final Logger log = Logger.get(ScaleGestureDetector.class);
         private final ScaleGestureListener listener;
         private final SparseArray<PointF> curPoints = new SparseArray<>(2);
         private final SparseArray<PointF> prevPoints = new SparseArray<>(2);
@@ -543,10 +560,10 @@ public final class GestureDetector {
 
     public interface OnDownListener {
         /**
-         * ジェスチャーの追跡を開始を通知する。ダブルタップの場合でも最初のdownのみを通知する。
+         * ジェスチャーの追跡開始を通知する。ダブルタップの場合、最初のdownのみを通知する。
          * @param e ACTION_DOWNイベント。
          * @param id ポインターID。
-         * @return 続くジェスチャーイベントを受け取るリスナー。
+         * @return ポインターIDに対応したリスナーインスタンス。
          */
         GestureListener onDown(MotionEvent e, int id);
     }
@@ -555,15 +572,15 @@ public final class GestureDetector {
     public static class GestureListener {
 
         /**
-         * 連続タップが途切れた時に通知される。
+         * 連続タップが途切れた時に通知される。ジェスチャーの追跡はここで終了する。
          * @param e 最初のActionDownイベント。
          * @param count 連続タップした回数。
          */
         public void onTapConfirmed(MotionEvent e, int count) {}
 
         /**
-         * 1回以上の連続タップ直後で通知される。
-         * @param e 最初のタップのACTION_DOWNイベント。
+         * 1回以上の連続タップ直後で通知される。この通知の後も引き続きジェスチャー追跡する。
+         * @param e このタップのACTION_DOWNイベント。
          * @param count 連続タップした回数。
          */
         public void onTap(MotionEvent e, int count) {}
@@ -572,8 +589,9 @@ public final class GestureDetector {
          * ドラッグが開始されたことが通知される。
          * @param e 最初のACTION_DOWNイベント。
          * @param count ドラッグの前にタップした回数。
+         * @param longPress 長押しの後のドラッグだったらtrue。
          */
-        public void onDragStart(MotionEvent e, int count) {}
+        public void onDragStart(MotionEvent e, int count, boolean longPress) {}
 
         /**
          * ドラッグの最中にポインタが移動したときに通知される。
@@ -587,12 +605,14 @@ public final class GestureDetector {
         /**
          * ドラッグが終了したときに通知される。フリックで終了したときはこのメソッドではなく
          * {@link #onFling(MotionEvent, MotionEvent, float, float)} が呼ばれる。
+         * ジェスチャーの追跡は終了する。
          * @param e UPイベント。
          */
         public void onDragEnd(MotionEvent e) {}
 
         /**
          * フリックしたたときに通知される。
+         * ジェスチャーの追跡は終了する。
          * @param e1 最初のDOWNイベント。
          * @param e2 UPイベント。
          * @param velocityX X方向の速度。
@@ -609,17 +629,27 @@ public final class GestureDetector {
 
 
         /**
-         * 長押ししたときに通知される。
-         * @param e 最初のDOWNイベント。
+         * 長押ししたときに通知される。このあともジェスチャーの追跡を続ける。
+         * @param e1 最初のDOWNイベント。
+         * @param e2 この長押しのDOWNイベント。
          * @param count タッチして離した回数。最初のタッチで長押ししたときは0。
          */
-        public void onLongPress(MotionEvent e, int count) {}
+        public void onLongPress(MotionEvent e1, MotionEvent e2, int count) {}
+
+
+        /**
+         * 長押しして離したときに通知される。
+         * ジェスチャーの追跡は終了する。
+         * @param e 最初のDOWNイベント。
+         * @param count タップした回数。ロングタップも回数に含まれる。
+         */
+        public void onLongTap(MotionEvent e, int count) {}
 
 
         /**
          * リスナーが解放されるときに呼ばれる。
          */
-        public void onRelease() {}
+        public void onReleaseListener() {}
 
     }
 
@@ -637,7 +667,7 @@ public final class GestureDetector {
 
     private static final class Handler_ extends Handler {
 
-        private final Logger log = Logger.create(getClass());
+        private final Logger log = Logger.get(getClass());
         private WeakReference<GestureDetector> gesture;
 
 
@@ -665,8 +695,8 @@ public final class GestureDetector {
 
                 case LONG_TAP:
                     log.v("EVENT: long press - count:%d, id:%d", detector.count, detector.id);
-                    detector.listener.onLongPress(detector.firstDown, detector.count);
-                    g.removeSingle(detector.id);
+                    detector.listener.onLongPress(detector.firstDown, detector.lastDown, detector.count);
+                    detector.longPress = true;
                     break;
                 }
 

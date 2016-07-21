@@ -163,7 +163,14 @@ public final class Logger {
 
 
     @NonNull
+    @Deprecated
     public static Logger create(@NonNull final Class<?> cls) {
+        return get(cls);
+    }
+
+
+    @NonNull
+    public static Logger get(@NonNull final Class<?> cls) {
 
         // キャッシュにあればそれを返す
 
