@@ -31,7 +31,7 @@ public final class GestureDetector {
     static final int LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
     /** 単体ポインタージェスチャーの最大数。スケールイベントのポインター数には影響しない。 */
     public int maxPointers;
-    final Logger log = Logger.create(getClass());
+    final Logger log = Logger.get(getClass());
     final int doubleTapSlopSquare;
     final int touchSlopSquare;
     final float maxFlingVelocity;
@@ -145,7 +145,7 @@ public final class GestureDetector {
 
     final class SinglePointerDetector {
 
-        final Logger log = Logger.create(getClass());
+        final Logger log = Logger.get(getClass());
         final GestureDetector gesture;
         final int id;
         @NonNull
@@ -386,7 +386,7 @@ public final class GestureDetector {
 
         END;
 
-        final Logger log = Logger.create(Mode.class);
+        final Logger log = Logger.get(Mode.class);
         /** モードが移ったときに呼ばれる。 */
         void start(SinglePointerDetector detector) {}
         /** 次のモードに移る前に呼ばれる。 */
@@ -403,7 +403,7 @@ public final class GestureDetector {
 
     public final class ScaleGestureDetector {
 
-        private final Logger log = Logger.create(ScaleGestureDetector.class);
+        private final Logger log = Logger.get(ScaleGestureDetector.class);
         private final ScaleGestureListener listener;
         private final SparseArray<PointF> curPoints = new SparseArray<>(2);
         private final SparseArray<PointF> prevPoints = new SparseArray<>(2);
@@ -667,7 +667,7 @@ public final class GestureDetector {
 
     private static final class Handler_ extends Handler {
 
-        private final Logger log = Logger.create(getClass());
+        private final Logger log = Logger.get(getClass());
         private WeakReference<GestureDetector> gesture;
 
 
