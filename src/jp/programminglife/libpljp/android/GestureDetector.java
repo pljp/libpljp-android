@@ -447,15 +447,14 @@ public final class GestureDetector {
                 // ポインターの削除に成功して1つになったら通知する。
                 final boolean removed = curPoints.indexOfKey(id) >= 0;
                 curPoints.delete(id);
+                prevPoints.delete(id);
                 if ( removed && curPoints.size() == 1 ) {
                     log.v("スケールジェスチャー終了");
                     listener.onScaleEnd(this);
                     // スケールジェスチャーを繰り返しても同じIDが使われるのでcurPoints, prevPointsが大きくなることはないが
                     // もし増大したならクリアする
-                    if ( curPoints.size() > 2 )
-                        curPoints.clear();
-                    if ( prevPoints.size() > 2 )
-                        prevPoints.clear();
+                    /*if ( prevPoints.size() > 2 )
+                        prevPoints.clear();*/
                     ret = true;
                 }
 
@@ -508,6 +507,13 @@ public final class GestureDetector {
         }
 
 
+        public void getPointer(int index, PointF out) {
+            if ( index < 0 || index >= curPoints.size() )
+                throw new IllegalArgumentException();
+            out.set(curPoints.get(curPoints.keyAt(index)));
+        }
+
+
         public float getFocusX() {
             if ( curPoints.size() < 2 ) return 0;
             final PointF p1 = curPoints.valueAt(0);
@@ -548,11 +554,43 @@ public final class GestureDetector {
         }
 
 
+        public float getSpanX() {
+            if ( curPoints.size() < 2 ) return 1.f;
+            final PointF p1 = curPoints.valueAt(0);
+            final PointF p2 = curPoints.valueAt(1);
+            return Math.abs(p2.x - p1.x);
+        }
+
+
+        public float getSpanY() {
+            if ( curPoints.size() < 2 ) return 1.f;
+            final PointF p1 = curPoints.valueAt(0);
+            final PointF p2 = curPoints.valueAt(1);
+            return Math.abs(p2.y - p1.y);
+        }
+
+
         public float getPreviousSpan() {
             if ( prevPoints.size() < 2 ) return 1.f;
             final PointF p1 = prevPoints.valueAt(0);
             final PointF p2 = prevPoints.valueAt(1);
             return PointF.length(p2.x - p1.x, p2.y - p1.y);
+        }
+
+
+        public float getPreviousSpanX() {
+            if ( prevPoints.size() < 2 ) return 1.f;
+            final PointF p1 = prevPoints.valueAt(0);
+            final PointF p2 = prevPoints.valueAt(1);
+            return Math.abs(p2.x - p1.x);
+        }
+
+
+        public float getPreviousSpanY() {
+            if ( prevPoints.size() < 2 ) return 1.f;
+            final PointF p1 = prevPoints.valueAt(0);
+            final PointF p2 = prevPoints.valueAt(1);
+            return Math.abs(p2.y - p1.y);
         }
 
     }
