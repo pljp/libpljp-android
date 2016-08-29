@@ -132,6 +132,9 @@ public class ScrollableView extends View {
                 ViewCompat.postInvalidateOnAnimation(this);
 
         }
+        else if ( actionMasked == MotionEvent.ACTION_DOWN ) {
+            scroller.forceFinished(true);
+        }
         return false;
 
     }
@@ -245,7 +248,7 @@ public class ScrollableView extends View {
 
         int sx = getScrollX() + Math.round(distanceX);
         int sy = getScrollY() + Math.round(distanceY);
-        float w = getWidth();
+        float w = getViewPortWidth();
         float h = getViewPortHeight();
         int maxX = computeMaxX();
         int maxY = computeMaxY();
