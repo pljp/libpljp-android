@@ -31,10 +31,6 @@ public class ScrollableView extends View {
 
     /** コンテンツのサイズ。paddingを含む。 */
     private final Rect contentRect = new Rect();
-    private int viewPortMarginLeft;
-    private int viewPortMarginTop;
-    private int viewPortMarginRight;
-    private int viewPortMarginBottom;
 
     // スクロール
 
@@ -90,29 +86,7 @@ public class ScrollableView extends View {
 
     public final void setContentSize(int width, int height) {
         contentRect.set(0, 0, width, height);
-        correctScrollPosition();
-    }
-
-
-    public final void setViewPortMargin(int left, int top, int right, int bottom, boolean animation) {
-
-        this.viewPortMarginLeft = left;
-        this.viewPortMarginTop = top;
-        this.viewPortMarginRight = right;
-        this.viewPortMarginBottom = bottom;
-        final int scrollX = getScrollX();
-        final int scrollY = getScrollY();
-        Point p = new Point(scrollX, scrollY);
-        if ( correctScrollPosition(p) ) {
-            if ( animation ) {
-                scroller.forceFinished(true);
-                scroller.startScroll(scrollX, scrollY, p.x - scrollX, p.y - scrollY);
-            }
-            else {
-                scrollTo(p.x, p.y);
-            }
-        }
-
+        correctScrollPosition(false);
     }
 
 
@@ -158,11 +132,18 @@ public class ScrollableView extends View {
     }
 
 
-    private void correctScrollPosition() {
+    public void correctScrollPosition(boolean animation) {
 
         correctScrollPositionPoint.set(getScrollX(), getScrollY());
-        if ( correctScrollPosition(correctScrollPositionPoint) )
-            scrollTo(correctScrollPositionPoint.x, correctScrollPositionPoint.y);
+        if ( correctScrollPosition(correctScrollPositionPoint) ) {
+            if ( animation ) {
+                scroller.forceFinished(true);
+                scroller.startScroll(getScrollX(), getScrollY(),
+                        correctScrollPositionPoint.x - getScrollX(), correctScrollPositionPoint.y - getScrollY());
+            }
+            else
+                scrollTo(correctScrollPositionPoint.x, correctScrollPositionPoint.y);
+        }
 
     }
     private Point correctScrollPositionPoint = new Point();
@@ -205,13 +186,13 @@ public class ScrollableView extends View {
     }
 
 
-    private int getViewPortWidth() {
-        return getWidth() - viewPortMarginLeft - viewPortMarginRight;
+    public int getViewPortWidth() {
+        return getWidth() - getPaddingLeft() - getPaddingRight();
     }
 
 
-    private int getViewPortHeight() {
-        return getHeight() - viewPortMarginTop - viewPortMarginBottom;
+    public int getViewPortHeight() {
+        return getHeight() - getPaddingTop() - getPaddingBottom();
     }
 
 
@@ -222,19 +203,21 @@ public class ScrollableView extends View {
      */
     protected final void onFling(float velocityX, float velocityY) {
 
-        int scrollX = getScrollX();
-        int scrollY = getScrollY();
-        scroller.forceFinished(true);
-        int maxX = computeMaxX();
-        int maxY = computeMaxY();
-        float velocity = (float)Math.hypot(velocityX, velocityY);
+        final int scrollX = getScrollX();
+        final int scrollY = getScrollY();
+        final int minX = computeMinX();
+        final int minY = computeMinY();
+        final int maxX = computeMaxX();
+        final int maxY = computeMaxY();
+        final float velocity = (float)Math.hypot(velocityX, velocityY);
         coeffX = Math.abs(-velocityX / velocity);
         coeffY = Math.abs(-velocityY / velocity);
 
+        scroller.forceFinished(true);
         scroller.fling(scrollX, scrollY,
                 Math.round(-velocityX), Math.round(-velocityY),
-                contentRect.left, maxX,
-                contentRect.top, maxY);
+                minX, maxX,
+                minY, maxY);
         //log.v("x:%d, y:%d, vx:%d, vy:%d maxX:%d, maxY:%d", scrollX, scrollY, velocityX, velocityY, maxX, maxY);
         ViewCompat.postInvalidateOnAnimation(this);
 
@@ -246,15 +229,17 @@ public class ScrollableView extends View {
      */
     protected void onScroll(float pointerX, float pointerY, float distanceX, float distanceY) {
 
-        int sx = getScrollX() + Math.round(distanceX);
-        int sy = getScrollY() + Math.round(distanceY);
-        float w = getViewPortWidth();
-        float h = getViewPortHeight();
-        int maxX = computeMaxX();
-        int maxY = computeMaxY();
+        final int sx = getScrollX() + Math.round(distanceX);
+        final int sy = getScrollY() + Math.round(distanceY);
+        final float w = getViewPortWidth();
+        final float h = getViewPortHeight();
+        final int minX = computeMinX();
+        final int minY = computeMinY();
+        final int maxX = computeMaxX();
+        final int maxY = computeMaxY();
         //log.v("sx:%d, sy:%d, maxX:%d, maxY:%d pointerX:%d, pointerY:%d dx:%f, dy:%f", sx, sy, maxX, maxY, (int)pointerX, (int)pointerY, distanceX, distanceY);
 
-        scrollTo(clamp(sx, contentRect.left, maxX), clamp(sy, contentRect.top, maxY));
+        scrollTo(clamp(sx, minX, maxX), clamp(sy, minY, maxY));
 
         boolean needsInvalidate = sx < 0 && edgeEffectLeft.onPull(-distanceX / w, (h - pointerY) / h);
         if ( sx > maxX ) {
@@ -401,6 +386,18 @@ public class ScrollableView extends View {
 
 
     @Override
+    protected int computeHorizontalScrollExtent() {
+        return getViewPortWidth();
+    }
+
+
+    @Override
+    protected int computeVerticalScrollExtent() {
+        return getViewPortHeight();
+    }
+
+
+    @Override
     @CallSuper
     public void draw(@NonNull Canvas canvas) {
 
@@ -408,55 +405,47 @@ public class ScrollableView extends View {
         int h = getViewPortHeight();
         //log.v("x:%d, y:%d, w:%d, h:%d", x, y, w, h);
 
-        int c1 = canvas.save();
-        canvas.translate(viewPortMarginLeft, viewPortMarginTop);
-        final int clipX = getScrollX();
-        final int clipY = getScrollY();
-        canvas.clipRect(clipX, clipY, clipX + w, clipY + h);
-
         super.draw(canvas);
 
         boolean needsInvalidate = false;
 
         //log.v("" + (t?"t":"") + (b?"b":"") + (l?"l":"") + (r?"r":""));
 
-        canvas.translate(getScrollX(), getScrollY());
+        int c = canvas.save();
+        canvas.translate(getPaddingLeft() + getScrollX(), getPaddingTop() + getScrollY());
         if ( !edgeEffectTop.isFinished() ) {
-            int c2 = canvas.save();
-            canvas.translate(0, 0);
             edgeEffectTop.setSize(w, h);
             needsInvalidate = edgeEffectTop.draw(canvas);
-            canvas.restoreToCount(c2);
         }
 
         if ( !edgeEffectBottom.isFinished() ) {
-            int c2 = canvas.save();
             canvas.rotate(180);
             canvas.translate(-w, -h);
             edgeEffectBottom.setSize(w, h);
             needsInvalidate = edgeEffectBottom.draw(canvas);
-            canvas.restoreToCount(c2);
+            canvas.translate(w, h);
+            canvas.rotate(-180);
         }
 
         if ( !edgeEffectLeft.isFinished() ) {
-            int c2 = canvas.save();
             canvas.rotate(270);
             canvas.translate(-h, 0);
             edgeEffectLeft.setSize(h, w);
             needsInvalidate |= edgeEffectLeft.draw(canvas);
-            canvas.restoreToCount(c2);
+            canvas.translate(h, 0);
+            canvas.rotate(-270);
         }
 
         if ( !edgeEffectRight.isFinished() ) {
-            int c2 = canvas.save();
             canvas.rotate(90);
             canvas.translate(0, -w);
             edgeEffectRight.setSize(h, w);
             needsInvalidate |= edgeEffectRight.draw(canvas);
-            canvas.restoreToCount(c2);
+            canvas.translate(0, w);
+            canvas.rotate(-90);
         }
 
-        canvas.restoreToCount(c1);
+        canvas.restoreToCount(c);
 
         if ( needsInvalidate )
             ViewCompat.postInvalidateOnAnimation(this);
