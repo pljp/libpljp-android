@@ -111,6 +111,20 @@ public class ScrollableView extends View {
 
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        final int wMode = View.MeasureSpec.getMode(widthMeasureSpec);
+        final int hMode = View.MeasureSpec.getMode(heightMeasureSpec);
+        final int w = View.MeasureSpec.getSize(widthMeasureSpec);
+        final int h = View.MeasureSpec.getSize(heightMeasureSpec);
+        setMeasuredDimension(
+                wMode == View.MeasureSpec.UNSPECIFIED ? ViewCompat.MEASURED_SIZE_MASK : w,
+                hMode == View.MeasureSpec.UNSPECIFIED ? ViewCompat.MEASURED_SIZE_MASK : h);
+
+    }
+
+
+    @Override
     @CallSuper
     public boolean onTouchEvent(@NonNull MotionEvent event) {
 
