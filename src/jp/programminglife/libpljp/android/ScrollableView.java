@@ -435,8 +435,21 @@ public class ScrollableView extends View {
     @CallSuper
     public void draw(@NonNull Canvas canvas) {
 
-        int w = getViewPortWidth();
-        int h = getViewPortHeight();
+        int w, h;
+        float tx, ty;
+        final int style = getScrollBarStyle();
+        if ( style == SCROLLBARS_INSIDE_INSET || style == SCROLLBARS_INSIDE_OVERLAY ) {
+            w = getViewPortWidth();
+            h = getViewPortHeight();
+            tx = getScrollX() + getPaddingLeft();
+            ty = getScrollY() + getPaddingTop();
+        }
+        else {
+            w = getWidth();
+            h = getHeight();
+            tx = getScrollX();
+            ty = getScrollY();
+        }
         //log.v("x:%d, y:%d, w:%d, h:%d", x, y, w, h);
 
         super.draw(canvas);
@@ -445,14 +458,17 @@ public class ScrollableView extends View {
 
         //log.v("" + (t?"t":"") + (b?"b":"") + (l?"l":"") + (r?"r":""));
 
+        final boolean showHorizontal = contentRect.width() > w;
+        final boolean showVertical = contentRect.height() > h;
+
         int c = canvas.save();
-        canvas.translate(getPaddingLeft() + getScrollX(), getPaddingTop() + getScrollY());
-        if ( !edgeEffectTop.isFinished() ) {
+        canvas.translate(tx, ty);
+        if ( showVertical && !edgeEffectTop.isFinished() ) {
             edgeEffectTop.setSize(w, h);
             needsInvalidate = edgeEffectTop.draw(canvas);
         }
 
-        if ( !edgeEffectBottom.isFinished() ) {
+        if ( showVertical && !edgeEffectBottom.isFinished() ) {
             canvas.rotate(180);
             canvas.translate(-w, -h);
             edgeEffectBottom.setSize(w, h);
@@ -461,7 +477,7 @@ public class ScrollableView extends View {
             canvas.rotate(-180);
         }
 
-        if ( !edgeEffectLeft.isFinished() ) {
+        if ( showHorizontal && !edgeEffectLeft.isFinished() ) {
             canvas.rotate(270);
             canvas.translate(-h, 0);
             edgeEffectLeft.setSize(h, w);
@@ -470,7 +486,7 @@ public class ScrollableView extends View {
             canvas.rotate(-270);
         }
 
-        if ( !edgeEffectRight.isFinished() ) {
+        if ( showHorizontal && !edgeEffectRight.isFinished() ) {
             canvas.rotate(90);
             canvas.translate(0, -w);
             edgeEffectRight.setSize(h, w);
