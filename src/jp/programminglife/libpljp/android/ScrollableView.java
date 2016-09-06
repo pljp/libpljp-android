@@ -458,14 +458,17 @@ public class ScrollableView extends View {
 
         //log.v("" + (t?"t":"") + (b?"b":"") + (l?"l":"") + (r?"r":""));
 
+        final boolean showHorizontal = contentRect.width() > w;
+        final boolean showVertical = contentRect.height() > h;
+
         int c = canvas.save();
         canvas.translate(tx, ty);
-        if ( !edgeEffectTop.isFinished() ) {
+        if ( showVertical && !edgeEffectTop.isFinished() ) {
             edgeEffectTop.setSize(w, h);
             needsInvalidate = edgeEffectTop.draw(canvas);
         }
 
-        if ( !edgeEffectBottom.isFinished() ) {
+        if ( showVertical && !edgeEffectBottom.isFinished() ) {
             canvas.rotate(180);
             canvas.translate(-w, -h);
             edgeEffectBottom.setSize(w, h);
@@ -474,7 +477,7 @@ public class ScrollableView extends View {
             canvas.rotate(-180);
         }
 
-        if ( !edgeEffectLeft.isFinished() ) {
+        if ( showHorizontal && !edgeEffectLeft.isFinished() ) {
             canvas.rotate(270);
             canvas.translate(-h, 0);
             edgeEffectLeft.setSize(h, w);
@@ -483,7 +486,7 @@ public class ScrollableView extends View {
             canvas.rotate(-270);
         }
 
-        if ( !edgeEffectRight.isFinished() ) {
+        if ( showHorizontal && !edgeEffectRight.isFinished() ) {
             canvas.rotate(90);
             canvas.translate(0, -w);
             edgeEffectRight.setSize(h, w);
