@@ -435,8 +435,21 @@ public class ScrollableView extends View {
     @CallSuper
     public void draw(@NonNull Canvas canvas) {
 
-        int w = getViewPortWidth();
-        int h = getViewPortHeight();
+        int w, h;
+        float tx, ty;
+        final int style = getScrollBarStyle();
+        if ( style == SCROLLBARS_INSIDE_INSET || style == SCROLLBARS_INSIDE_OVERLAY ) {
+            w = getViewPortWidth();
+            h = getViewPortHeight();
+            tx = getScrollX() + getPaddingLeft();
+            ty = getScrollY() + getPaddingTop();
+        }
+        else {
+            w = getWidth();
+            h = getHeight();
+            tx = getScrollX();
+            ty = getScrollY();
+        }
         //log.v("x:%d, y:%d, w:%d, h:%d", x, y, w, h);
 
         super.draw(canvas);
@@ -446,7 +459,7 @@ public class ScrollableView extends View {
         //log.v("" + (t?"t":"") + (b?"b":"") + (l?"l":"") + (r?"r":""));
 
         int c = canvas.save();
-        canvas.translate(getPaddingLeft() + getScrollX(), getPaddingTop() + getScrollY());
+        canvas.translate(tx, ty);
         if ( !edgeEffectTop.isFinished() ) {
             edgeEffectTop.setSize(w, h);
             needsInvalidate = edgeEffectTop.draw(canvas);
