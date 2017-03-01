@@ -1,4 +1,4 @@
-version = '0.7.2-SNAPSHOT'
+version = '0.8.0'
 group = 'jp.programminglife'
 
 apply plugin: 'com.android.library'
@@ -11,13 +11,14 @@ gradle.projectsEvaluated {
 }
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion '24.0.2'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
+        versionName version
     }
     buildTypes {
         release {
@@ -36,13 +37,9 @@ task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
 }
 
-repositories {
-    jcenter()
-}
-
 dependencies {
-    compile 'com.android.support:support-annotations:24.2.0'
-    compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:support-annotations:25.2.0'
+    compile 'com.android.support:support-v4:25.2.0'
 }
 
 artifacts {
@@ -53,6 +50,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: "file:${System.getProperty('user.home')}/.m2/repository")
+            pom.artifactId = 'libpljp-android'
         }
     }
 }
