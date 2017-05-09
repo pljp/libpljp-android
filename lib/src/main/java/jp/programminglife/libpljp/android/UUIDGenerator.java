@@ -33,13 +33,21 @@ public class UUIDGenerator {
     public UUIDGenerator(Context context) {this.context = context;}
 
 
+    @Deprecated
     public String generateString() {
         return UUIDUtils.generateString(context);
     }
+    public String generateString(long time) {
+        return UUIDUtils.generateString(context, time);
+    }
 
 
+    @Deprecated
     public UUID generate() {
         return UUIDUtils.generate(context);
+    }
+    public UUID generate(long time) {
+        return UUIDUtils.generate(context, time);
     }
 
 }

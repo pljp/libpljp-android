@@ -23,7 +23,6 @@ package jp.programminglife.libpljp.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -31,7 +30,6 @@ import android.support.annotation.Nullable;
 import java.security.SecureRandom;
 import java.util.Calendar;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public final class UUIDUtils {
@@ -41,8 +39,9 @@ public final class UUIDUtils {
     private static final SecureRandom rnd = new SecureRandom();
     private static final Object uuidLock = new Object();
     private static long lastUUIDTime = 0L;
-    private static int uuidClockSeq = 0;
-    private static AtomicInteger clockSeq = new AtomicInteger((int)(SystemClock.elapsedRealtime() & 0x7fffffff));
+    private static int clockSeqCount = 0;
+    /** 前回返したクロックシーケンスの値。 */
+    private static int clockSeq = new SecureRandom().nextInt() & 0x3fff;
 
     static {
         Calendar c = Calendar.getInstance();
@@ -88,26 +87,61 @@ public final class UUIDUtils {
 
 
     @NonNull
+    @Deprecated
     public static UUID generate(@NonNull Context context) {
-        long[] arr = generateLongArray(context);
+        return generate(context, System.currentTimeMillis());
+    }
+    @NonNull
+    public static UUID generate(@NonNull Context context, long time) {
+        long[] arr = generateLongArray(context, time);
+        return new UUID(arr[0], arr[1]);
+    }
+
+
+    @NonNull
+    @Deprecated
+    public static UUID generate(long node) {
+        return generate(node, System.currentTimeMillis());
+    }
+    @NonNull
+    public static UUID generate(long node, long time) {
+        long[] arr = generateLongArray(node, time);
         return new UUID(arr[0], arr[1]);
     }
 
 
     @NonNull
     public static long[] generateLongArray(@NonNull Context context) {
-
+        return generateLongArray(context, System.currentTimeMillis());
+    }
+    @NonNull
+    public static long[] generateLongArray(@NonNull Context context, long time) {
         long node = getDeviceNodeId(context);
-        long time = System.currentTimeMillis();
-        int clockSeq = nextClockSeq();
-        return makeUUIDVersion1(time, clockSeq, node);
-
+        return generateLongArray(node, time);
     }
 
 
     @NonNull
+    @Deprecated
+    public static long[] generateLongArray(long node) {
+        long time = System.currentTimeMillis();
+        return generateLongArray(node, time);
+    }
+    @NonNull
+    public static long[] generateLongArray(long node, long time) {
+        int clockSeq = nextClockSeq(time);
+        return makeUUIDVersion1(time, clockSeq, node);
+    }
+
+
+    @NonNull
+    @Deprecated
     public static String generateString(@NonNull Context context) {
-        return generate(context).toString();
+        return generate(context, System.currentTimeMillis()).toString();
+    }
+    @NonNull
+    public static String generateString(@NonNull Context context, long time) {
+        return generate(context, time).toString();
     }
 
 
@@ -136,8 +170,17 @@ public final class UUIDUtils {
     }
 
 
-    private static int nextClockSeq() {
-        return clockSeq.getAndIncrement();
+    private static int nextClockSeq(long time) {
+        synchronized (uuidLock) {
+            if ( time == lastUUIDTime ) {
+                if ( clockSeqCount++ == 0x3fff )
+                    throw new IllegalStateException("clock seq overflow.");
+                return ++clockSeq;
+            }
+            lastUUIDTime = time;
+            clockSeqCount = 0;
+            return clockSeq;
+        }
     }
 
 
