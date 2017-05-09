@@ -45,9 +45,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 StringBuilder sb = new StringBuilder();
-                final long time = System.currentTimeMillis();
                 for (int i=0; i<n; i++) {
-                    sb.append(UUIDUtils.generate(nodeId, time)).append("\n");
+                    sb.append(UUIDUtils.generate(nodeId, System.currentTimeMillis())).append("\n");
                 }
                 binding.aUuidText.setText(sb.toString());
             }

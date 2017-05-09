@@ -175,11 +175,12 @@ public final class UUIDUtils {
             if ( time == lastUUIDTime ) {
                 if ( clockSeqCount++ == 0x3fff )
                     throw new IllegalStateException("clock seq overflow.");
-                return ++clockSeq;
             }
-            lastUUIDTime = time;
-            clockSeqCount = 0;
-            return clockSeq;
+            else {
+                lastUUIDTime = time;
+                clockSeqCount = 0;
+            }
+            return clockSeq++;
         }
     }
 
