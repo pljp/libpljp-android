@@ -29,6 +29,7 @@ import android.support.annotation.Nullable;
 
 import java.security.SecureRandom;
 import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.UUID;
 
 
@@ -44,7 +45,7 @@ public final class UUIDUtils {
     private static int clockSeq = new SecureRandom().nextInt() & 0x3fff;
 
     static {
-        Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         c.clear();
         c.set(1582, Calendar.OCTOBER, 5);
         millis1582_10_15 = c.getTimeInMillis();
@@ -211,6 +212,7 @@ public final class UUIDUtils {
      * UUIDのタイムスタンプをJavaの時刻(ミリ秒)に変換する。
      * @param uuidMsb UUIDの上位64ビット。
      */
+    @Deprecated
     public static long toJavaTimestamp(long uuidMsb) {
         return (
             ((uuidMsb & 0xffffffff00000000L) >>> 32) |
@@ -220,6 +222,12 @@ public final class UUIDUtils {
     }
 
 
+    public static long toEpochMilli(long timestamp) {
+        return timestamp / 10000L + millis1582_10_15;
+    }
+
+
+    @Deprecated
     public static long getNode(UUID uuid) {
         return uuid.getLeastSignificantBits() & 0xffffffffffffL;
     }
