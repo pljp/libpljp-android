@@ -1,1 +1,1 @@
-include ':lib', ':uuidgenerator'
+include ':lib', ':uuidgenerator', ':rxandroid', ':kotlin'
