@@ -29,6 +29,9 @@ android {
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 task sourcesJar(type: Jar) {
