@@ -1,4 +1,4 @@
-package jp.programminglife.rxandroid;
+package jp.programminglife.libpljp.rxandroid;
 
 
 import android.database.Cursor;

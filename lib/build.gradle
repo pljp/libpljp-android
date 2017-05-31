@@ -12,7 +12,7 @@ gradle.projectsEvaluated {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "$build_tools_version"
+    buildToolsVersion build_tools_version
 
     defaultConfig {
         minSdkVersion 10
