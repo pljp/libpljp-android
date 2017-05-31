@@ -15,6 +15,12 @@ import android.widget.AbsListView
 import android.widget.Adapter
 import android.widget.AdapterView
 import jp.programminglife.libpljp.android.Logger
+import java.util.UUID
+
+// UUID
+
+val UUID.epochMilli get() = jp.programminglife.libpljp.android.UUIDUtils.toEpochMilli(timestamp())
+
 
 // Data Binding
 
