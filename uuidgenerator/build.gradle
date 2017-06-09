@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "jp.programminglife.libpljp.android.uuidgenerator"
-        minSdkVersion 17
+        minSdkVersion 11
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"

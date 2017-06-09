@@ -1,4 +1,4 @@
-package jp.programminglife.libpljp.android.kotlin
+package jp.programminglife.libpljp.android
 
 import android.util.SparseArray
 import android.util.SparseBooleanArray
