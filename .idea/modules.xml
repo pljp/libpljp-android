@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/kotlin/kotlin.iml" filepath="$PROJECT_DIR$/kotlin/kotlin.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" />
       <module fileurl="file://$PROJECT_DIR$/libpljp_android.iml" filepath="$PROJECT_DIR$/libpljp_android.iml" />
       <module fileurl="file://$PROJECT_DIR$/realm/realm.iml" filepath="$PROJECT_DIR$/realm/realm.iml" />
