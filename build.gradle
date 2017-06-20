@@ -1,13 +1,13 @@
 buildscript {
-    ext.lib_version = '0.10.0-SNAPSHOT'
+    ext.lib_version = '0.10.0'
     ext.build_tools_version = '25.0.3'
-    ext.support_lib_version = '25.3.1'
+    ext.support_lib_version = '25.4.0'
     ext.kotlin_version = '1.1.2-3'
     repositories {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.2'
+        classpath 'com.android.tools.build:gradle:2.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "io.realm:realm-gradle-plugin:3.3.1"
 
@@ -17,6 +17,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
     }
 }
 
