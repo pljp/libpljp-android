@@ -118,8 +118,8 @@ public class ScrollableView extends View {
         final int w = View.MeasureSpec.getSize(widthMeasureSpec);
         final int h = View.MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(
-                wMode == View.MeasureSpec.UNSPECIFIED ? ViewCompat.MEASURED_SIZE_MASK : w,
-                hMode == View.MeasureSpec.UNSPECIFIED ? ViewCompat.MEASURED_SIZE_MASK : h);
+                wMode == View.MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : w,
+                hMode == View.MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : h);
 
     }
 
