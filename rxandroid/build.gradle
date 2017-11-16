@@ -6,7 +6,6 @@ apply plugin: 'maven'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion build_tools_version
 
     defaultConfig {
         minSdkVersion 14
