@@ -42,10 +42,10 @@ import android.widget.OverScroller;
  * OverScrollerとEdgeEffectを持ったビューの基本クラス。
  * サブクラスはsetContentSize(), setViewPortMargin(), onFling(), onScroll()を適時呼び出す必要がある。
  */
-public class ScrollableView extends View {
+public class ScrollableViewGroup extends View {
 
-    final Logger log = Logger.get(ScrollableView.class);
-    private final ScrollableView self = this;
+    final Logger log = Logger.get(ScrollableViewGroup.class);
+    private final ScrollableViewGroup self = this;
 
     // 各種サイズ
 
@@ -63,21 +63,21 @@ public class ScrollableView extends View {
     private float coeffY;
 
 
-    public ScrollableView(Context context) {
+    public ScrollableViewGroup(Context context) {
 
         super(context);
         init(context);
     }
 
 
-    public ScrollableView(Context context, AttributeSet attrs) {
+    public ScrollableViewGroup(Context context, AttributeSet attrs) {
 
         super(context, attrs);
         init(context);
     }
 
 
-    public ScrollableView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ScrollableViewGroup(Context context, AttributeSet attrs, int defStyleAttr) {
 
         super(context, attrs, defStyleAttr);
         init(context);
@@ -85,7 +85,7 @@ public class ScrollableView extends View {
 
 
     @TargetApi(VERSION_CODES.LOLLIPOP)
-    public ScrollableView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ScrollableViewGroup(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context);
@@ -113,13 +113,13 @@ public class ScrollableView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        final int wMode = View.MeasureSpec.getMode(widthMeasureSpec);
-        final int hMode = View.MeasureSpec.getMode(heightMeasureSpec);
-        final int w = View.MeasureSpec.getSize(widthMeasureSpec);
-        final int h = View.MeasureSpec.getSize(heightMeasureSpec);
+        final int wMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int hMode = MeasureSpec.getMode(heightMeasureSpec);
+        final int w = MeasureSpec.getSize(widthMeasureSpec);
+        final int h = MeasureSpec.getSize(heightMeasureSpec);
         setMeasuredDimension(
-                wMode == View.MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : w,
-                hMode == View.MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : h);
+                wMode == MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : w,
+                hMode == MeasureSpec.UNSPECIFIED ? View.MEASURED_SIZE_MASK : h);
 
     }
 
