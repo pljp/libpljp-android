@@ -51,7 +51,7 @@ dependencies {
     compile "com.android.support:support-annotations:$support_lib_version"
     compile "com.android.support:support-v4:$support_lib_version"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    kapt 'com.android.databinding:compiler:3.0.0'
+    kapt "com.android.databinding:compiler:$android_studio_version"
     testImplementation 'junit:junit:4.12'
 }
 
