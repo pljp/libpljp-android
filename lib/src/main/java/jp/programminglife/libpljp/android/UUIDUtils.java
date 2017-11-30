@@ -210,6 +210,7 @@ public final class UUIDUtils {
 
     /**
      * UUIDのタイムスタンプをJavaの時刻(ミリ秒)に変換する。
+     * @deprecated UUID.epochMilli拡張関数を使う。
      * @param uuidMsb UUIDの上位64ビット。
      */
     @Deprecated
@@ -227,6 +228,11 @@ public final class UUIDUtils {
     }
 
 
+    /**
+     * @deprecated UUID.node()を使う。
+     * @param uuid
+     * @return
+     */
     @Deprecated
     public static long getNode(UUID uuid) {
         return uuid.getLeastSignificantBits() & 0xffffffffffffL;

@@ -11,30 +11,30 @@ enum class DialogTargetType {
 }
 
 
-fun android.support.v4.app.DialogFragment.setDialogResultListener(listener: Any, dialogArguments: android.os.Bundle, requestCode: Int) {
+fun DialogFragment.setDialogResultListener(listener: Any, dialogArguments: Bundle, requestCode: Int) {
 
-    if (listener is android.support.v4.app.Fragment) {
-        setTargetFragment(listener, requestCode)
-        dialogArguments.putSerializable("ViewUtils:targetType",
-                jp.programminglife.libpljp.android.DialogTargetType.FRAGMENT)
-    } else if (listener is android.app.Activity) {
-        dialogArguments.putSerializable("ViewUtils:targetType",
-                jp.programminglife.libpljp.android.DialogTargetType.ACTIVITY)
-        dialogArguments.putInt("ViewUtils:requestCode", requestCode)
-    } else
-        throw IllegalArgumentException("listenerはFragmentかActivityを継承している必要があります。")
+    when (listener) {
+        is Fragment -> {
+            setTargetFragment(listener, requestCode)
+            dialogArguments.putSerializable("ViewUtils:targetType", DialogTargetType.FRAGMENT)
+        }
+        is Activity -> {
+            dialogArguments.putSerializable("ViewUtils:targetType", DialogTargetType.ACTIVITY)
+            dialogArguments.putInt("ViewUtils:requestCode", requestCode)
+        }
+        else -> throw IllegalArgumentException("listenerはFragmentかActivityを継承している必要があります。")
+    }
 
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> android.support.v4.app.DialogFragment.getDialogResultListener(): T {
+fun <T> DialogFragment.getDialogResultListener(): T {
 
-    val type = arguments.get("ViewUtils:targetType") as? jp.programminglife.libpljp.android.DialogTargetType
+    val type = arguments.get("ViewUtils:targetType") as? DialogTargetType
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
-    when (type) {
-        jp.programminglife.libpljp.android.DialogTargetType.FRAGMENT -> return targetFragment as T
-        jp.programminglife.libpljp.android.DialogTargetType.ACTIVITY -> return activity as T
-        else -> throw RuntimeException()
+    return when (type) {
+        DialogTargetType.FRAGMENT -> targetFragment as T
+        DialogTargetType.ACTIVITY -> activity as T
     }
 
 }
@@ -42,14 +42,13 @@ fun <T> android.support.v4.app.DialogFragment.getDialogResultListener(): T {
 /**
  * setDialogListenerでセットしたリクエストコードを取り出す。
  */
-fun android.support.v4.app.DialogFragment.getDialogRequestCode(): Int {
+fun DialogFragment.getDialogRequestCode(): Int {
 
-    val type = arguments.get("ViewUtils:targetType") as? jp.programminglife.libpljp.android.DialogTargetType
+    val type = arguments.get("ViewUtils:targetType") as? DialogTargetType
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
-    when (type) {
-        jp.programminglife.libpljp.android.DialogTargetType.FRAGMENT -> return targetRequestCode
-        jp.programminglife.libpljp.android.DialogTargetType.ACTIVITY -> return arguments.getInt("ViewUtils:requestCode")
-        else -> throw RuntimeException()
+    return when (type) {
+        DialogTargetType.FRAGMENT -> targetRequestCode
+        DialogTargetType.ACTIVITY -> arguments.getInt("ViewUtils:requestCode")
     }
 
 }
