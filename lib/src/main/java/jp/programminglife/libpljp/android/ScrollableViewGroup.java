@@ -35,6 +35,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
 
@@ -42,7 +43,7 @@ import android.widget.OverScroller;
  * OverScrollerとEdgeEffectを持ったビューの基本クラス。
  * サブクラスはsetContentSize(), setViewPortMargin(), onFling(), onScroll()を適時呼び出す必要がある。
  */
-public class ScrollableViewGroup extends View {
+abstract public class ScrollableViewGroup extends ViewGroup {
 
     final Logger log = Logger.get(ScrollableViewGroup.class);
     private final ScrollableViewGroup self = this;
@@ -500,5 +501,8 @@ public class ScrollableViewGroup extends View {
             ViewCompat.postInvalidateOnAnimation(this);
 
     }
+
+
+    abstract protected void onLayout(boolean changed, int l, int t, int r, int b);
 
 }
