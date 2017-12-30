@@ -623,7 +623,7 @@ public final class GestureDetector {
          * @param id ポインターID。
          * @return ポインターIDに対応したリスナーインスタンス。
          */
-        GestureListener onDown(MotionEvent e, int id);
+        @NonNull GestureListener onDown(@NonNull MotionEvent e, int id);
     }
 
 
@@ -634,14 +634,14 @@ public final class GestureDetector {
          * @param e 最初のActionDownイベント。
          * @param count 連続タップした回数。
          */
-        public void onTapConfirmed(MotionEvent e, int count) {}
+        public void onTapConfirmed(@NonNull MotionEvent e, int count) {}
 
         /**
          * 1回以上の連続タップ直後で通知される。この通知の後も引き続きジェスチャー追跡する。
          * @param e このタップのACTION_DOWNイベント。
          * @param count 連続タップした回数。
          */
-        public void onTap(MotionEvent e, int count) {}
+        public void onTap(@NonNull MotionEvent e, int count) {}
 
         /**
          * ドラッグが開始されたことが通知される。
@@ -649,7 +649,7 @@ public final class GestureDetector {
          * @param count ドラッグの前にタップした回数。
          * @param longPress 長押しの後のドラッグだったらtrue。
          */
-        public void onDragStart(MotionEvent e, int count, boolean longPress) {}
+        public void onDragStart(@NonNull MotionEvent e, int count, boolean longPress) {}
 
         /**
          * ドラッグの最中にポインタが移動したときに通知される。
@@ -658,7 +658,7 @@ public final class GestureDetector {
          * @param distanceX 前回の通知からのX軸の移動量。
          * @param distanceY 前回の通知からのY軸の移動量。
          */
-        public void onDragMove(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {}
+        public void onDragMove(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {}
 
         /**
          * ドラッグが終了したときに通知される。フリックで終了したときはこのメソッドではなく
@@ -666,7 +666,7 @@ public final class GestureDetector {
          * ジェスチャーの追跡は終了する。
          * @param e UPイベント。
          */
-        public void onDragEnd(MotionEvent e) {}
+        public void onDragEnd(@NonNull MotionEvent e) {}
 
         /**
          * フリックしたたときに通知される。
@@ -676,14 +676,14 @@ public final class GestureDetector {
          * @param velocityX X方向の速度。
          * @param velocityY Y方向の速度。
          */
-        public void onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {}
+        public void onFling(@NonNull MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {}
 
 
         /**
          * ドラッグがキャンセルされたときに通知ばれる。
          * @param e 最初のDOWNイベント。
          */
-        public void onDragCancel(MotionEvent e) {}
+        public void onDragCancel(@NonNull MotionEvent e) {}
 
 
         /**
@@ -692,7 +692,7 @@ public final class GestureDetector {
          * @param e2 この長押しのDOWNイベント。
          * @param count タッチして離した回数。最初のタッチで長押ししたときは0。
          */
-        public void onLongPress(MotionEvent e1, MotionEvent e2, int count) {}
+        public void onLongPress(@NonNull MotionEvent e1, @NonNull MotionEvent e2, int count) {}
 
 
         /**
@@ -701,7 +701,7 @@ public final class GestureDetector {
          * @param e 最初のDOWNイベント。
          * @param count タップした回数。ロングタップも回数に含まれる。
          */
-        public void onLongTap(MotionEvent e, int count) {}
+        public void onLongTap(@NonNull MotionEvent e, int count) {}
 
 
         /**
@@ -714,11 +714,11 @@ public final class GestureDetector {
 
     public static class ScaleGestureListener {
 
-        public void onScaleBegin(ScaleGestureDetector detector) {}
+        public void onScaleBegin(@NonNull ScaleGestureDetector detector) {}
 
-        public void onScale(ScaleGestureDetector detector) {}
+        public void onScale(@NonNull ScaleGestureDetector detector) {}
 
-        public void onScaleEnd(ScaleGestureDetector detector) {}
+        public void onScaleEnd(@NonNull ScaleGestureDetector detector) {}
 
     }
 
