@@ -11,12 +11,19 @@ enum class DialogTargetType {
 }
 
 
-fun DialogFragment.setDialogResultListener(listener: Any, dialogArguments: Bundle, requestCode: Int) {
+fun DialogFragment.setDialogResultListener(listener: Activity, dialogArguments: Bundle, requestCode: Int) {
+}
 
+
+/**
+ * ダイアログの結果を受け取るFragmentを設定する。
+ * このメソッドを使用するためには DialogFragment を childFragmentManager を使って表示する必要がある。
+ */
+fun DialogFragment.setDialogResultListener(listener:Any, dialogArguments: Bundle, requestCode: Int) {
     when (listener) {
         is Fragment -> {
-            setTargetFragment(listener, requestCode)
             dialogArguments.putSerializable("ViewUtils:targetType", DialogTargetType.FRAGMENT)
+            dialogArguments.putInt("ViewUtils:requestCode", requestCode)
         }
         is Activity -> {
             dialogArguments.putSerializable("ViewUtils:targetType", DialogTargetType.ACTIVITY)
@@ -24,16 +31,15 @@ fun DialogFragment.setDialogResultListener(listener: Any, dialogArguments: Bundl
         }
         else -> throw IllegalArgumentException("listenerはFragmentかActivityを継承している必要があります。")
     }
-
 }
 
 @Suppress("UNCHECKED_CAST")
 fun <T> DialogFragment.getDialogResultListener(): T {
 
-    val type = arguments.get("ViewUtils:targetType") as? DialogTargetType
+    val type = arguments.getSerializable("ViewUtils:targetType") as? DialogTargetType
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
     return when (type) {
-        DialogTargetType.FRAGMENT -> targetFragment as T
+        DialogTargetType.FRAGMENT -> parentFragment as T
         DialogTargetType.ACTIVITY -> activity as T
     }
 
@@ -43,12 +49,7 @@ fun <T> DialogFragment.getDialogResultListener(): T {
  * setDialogListenerでセットしたリクエストコードを取り出す。
  */
 fun DialogFragment.getDialogRequestCode(): Int {
-
-    val type = arguments.get("ViewUtils:targetType") as? DialogTargetType
+    return (arguments.getSerializable("ViewUtils:targetType") as? DialogTargetType)
+            ?.let { arguments.getInt("ViewUtils:requestCode") }
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
-    return when (type) {
-        DialogTargetType.FRAGMENT -> targetRequestCode
-        DialogTargetType.ACTIVITY -> arguments.getInt("ViewUtils:requestCode")
-    }
-
 }
