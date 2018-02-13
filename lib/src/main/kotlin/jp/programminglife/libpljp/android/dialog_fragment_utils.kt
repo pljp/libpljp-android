@@ -11,10 +11,6 @@ enum class DialogTargetType {
 }
 
 
-fun DialogFragment.setDialogResultListener(listener: Activity, dialogArguments: Bundle, requestCode: Int) {
-}
-
-
 /**
  * ダイアログの結果を受け取るFragmentを設定する。
  * このメソッドを使用するためには DialogFragment を childFragmentManager を使って表示する必要がある。
