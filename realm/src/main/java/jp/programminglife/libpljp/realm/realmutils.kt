@@ -1,16 +1,41 @@
 package jp.programminglife.libpljp.realm
 
+import io.realm.Case
 import io.realm.Realm
 import io.realm.RealmModel
+import io.realm.kotlin.where
 import io.realm.log.RealmLog
+import java.util.Date
 
 /**
  * プロパティの値に一致するオブジェクトを一つだけ返す。
  * @return プロパティの値に一致したオブジェクト。複数見つかった場合どのオブジェクトを返すかは不定。見つからなければnull。
  */
-fun <T: RealmModel> Realm.get(cls: Class<T>, property: String, value: String): T? {
-    return this.where(cls).equalTo(property, value).findFirst()
-}
+fun <T: RealmModel> Realm.get(cls: Class<T>, property: String, value: String?): T? =
+        where(cls).equalTo(property, value).findFirst()
+
+inline fun <reified T: RealmModel> Realm.get(property: String, value: String?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: String?, casing: Case): T? =
+        where<T>().equalTo(property, value, casing).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Byte?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: ByteArray?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Short?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Int?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Long?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Double?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Float?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Boolean?): T? =
+        where<T>().equalTo(property, value).findFirst()
+inline fun <reified T: RealmModel> Realm.get(property: String, value: Date?): T? =
+        where<T>().equalTo(property, value).findFirst()
 
 
 /**
