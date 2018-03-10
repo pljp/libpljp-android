@@ -43,6 +43,6 @@ fun <E : Enum<E>> EnumSet<E>.serializeToString() = joinToString(",") { it.name }
 
 inline fun <reified E : Enum<E>> enumSetOf(serializedValue: String): EnumSet<E> = serializedValue
         .splitToSequence(',')
+        .filter { it.isNotEmpty() }
         .map { enumValueOf<E>(it) }
-        .toList()
-        .let { EnumSet.copyOf(it) }
+        .fold(EnumSet.noneOf(E::class.java)) { s, e -> s.add(e); s }
