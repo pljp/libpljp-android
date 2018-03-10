@@ -3,6 +3,7 @@ group = 'jp.programminglife'
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'realm-android'
 apply plugin: 'maven'
 
