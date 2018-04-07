@@ -1,7 +1,5 @@
 package jp.programminglife.libpljp.android
 
-import android.databinding.InverseBindingListener
-import android.databinding.InverseBindingMethod
 import android.widget.AbsListView
 
 
@@ -18,26 +16,3 @@ inline fun <reified I> AbsListView.checkedItems(): Sequence<I> {
 fun AbsListView.clearChecks() {
     checkedItemPositions.asSequence().forEach { setItemChecked(it, false) }
 }
-
-
-// checkedItemPosition の2-wayバインディングに関するアダプター
-
-@android.databinding.BindingAdapter("checkedItemPosition")
-fun AbsListView.setCheckedItemPosition(position: Int) {
-    if ( checkedItemPosition != position )
-        setItemChecked(position, true)
-}
-
-@android.databinding.BindingAdapter("checkedItemPositionAttrChanged")
-fun AbsListView.setOnAbsListViewItemClickListener(listener: InverseBindingListener?) {
-    if ( listener != null ) {
-        setOnItemClickListener { _, _, _, _ -> listener.onChange() }
-    } else {
-        onItemClickListener = null
-    }
-}
-
-@android.databinding.InverseBindingMethods(
-        InverseBindingMethod(type = AbsListView::class, attribute = "checkedItemPosition")
-)
-class AbsListViewBindingAdapters

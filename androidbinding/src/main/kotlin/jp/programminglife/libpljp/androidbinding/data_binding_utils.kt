@@ -1,4 +1,4 @@
-package jp.programminglife.libpljp.android
+package jp.programminglife.libpljp.androidbinding
 
 import android.databinding.Observable
 import android.databinding.ObservableList
