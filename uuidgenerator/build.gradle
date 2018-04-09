@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         applicationId "jp.programminglife.libpljp.android.uuidgenerator"
@@ -22,11 +22,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
 
 dependencies {
-    compile project(':lib')
-    compile "com.android.support:appcompat-v7:$support_lib_version"
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile "com.android.support:design:$support_lib_version"
+    implementation project(':lib')
+    implementation "com.android.support:appcompat-v7:$support_lib_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation "com.android.support:design:$support_lib_version"
 }

@@ -1,16 +1,19 @@
-package jp.programminglife.libpljp.android
+package jp.programminglife.libpljp.androidbinding
 
 import android.databinding.InverseBindingListener
 import android.databinding.InverseBindingMethod
 import android.view.View
+import android.widget.AbsListView
 import android.widget.Adapter
 import android.widget.AdapterView
+import jp.programminglife.libpljp.android.Logger
 
 
 private class adapter_view_utils
-private val log = Logger.get(adapter_view_utils::class.java)
+private val log = Logger.get(
+        adapter_view_utils::class.java)
 
-// selectedItem の2-Wayバインディングに関するアダプター
+// AdapterView.selectedItem の2-Wayバインディングに関するアダプター
 
 @android.databinding.BindingAdapter("selectedItem")
 fun <A: Adapter> AdapterView<A>.setSelectedItem(item: Any?) {
@@ -55,3 +58,27 @@ interface OnNothingSelected {
 
 @android.databinding.InverseBindingMethods(InverseBindingMethod(type = AdapterView::class, attribute = "selectedItem"))
 class AdapterViewBindingAdapters
+
+
+
+// ListView.checkedItemPosition の2-wayバインディングに関するアダプター
+
+@android.databinding.BindingAdapter("checkedItemPosition")
+fun AbsListView.setCheckedItemPosition(position: Int) {
+    if ( checkedItemPosition != position )
+        setItemChecked(position, true)
+}
+
+@android.databinding.BindingAdapter("checkedItemPositionAttrChanged")
+fun AbsListView.setOnAbsListViewItemClickListener(listener: InverseBindingListener?) {
+    if ( listener != null ) {
+        setOnItemClickListener { _, _, _, _ -> listener.onChange() }
+    } else {
+        onItemClickListener = null
+    }
+}
+
+@android.databinding.InverseBindingMethods(
+        InverseBindingMethod(type = AbsListView::class, attribute = "checkedItemPosition")
+)
+class AbsListViewBindingAdapters

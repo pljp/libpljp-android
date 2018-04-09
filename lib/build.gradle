@@ -3,7 +3,6 @@ group = 'jp.programminglife'
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'maven'
 
 gradle.projectsEvaluated {
@@ -13,7 +12,7 @@ gradle.projectsEvaluated {
 }
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 14
@@ -49,10 +48,9 @@ task sourcesJar(type: Jar) {
 }
 
 dependencies {
-    compile "com.android.support:support-annotations:$support_lib_version"
-    compile "com.android.support:support-v4:$support_lib_version"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    kapt "com.android.databinding:compiler:$android_studio_version"
+    api "com.android.support:support-annotations:$support_lib_version"
+    api "com.android.support:support-v4:$support_lib_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation 'junit:junit:4.12'
 }
 

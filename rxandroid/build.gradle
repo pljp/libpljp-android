@@ -5,7 +5,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 14
@@ -26,10 +26,10 @@ android {
 }
 
 dependencies {
-    compile project(':lib')
-    compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.10'
-    compile "com.android.support:support-v4:$support_lib_version"
+    api project(':lib')
+    api 'io.reactivex:rxandroid:1.2.1'
+    api 'io.reactivex:rxjava:1.1.10'
+    api "com.android.support:support-v4:$support_lib_version"
 }
 
 task sourcesJar(type: Jar) {

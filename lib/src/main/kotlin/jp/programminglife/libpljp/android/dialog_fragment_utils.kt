@@ -32,8 +32,8 @@ fun DialogFragment.setDialogResultListener(listener:Any, dialogArguments: Bundle
 @Suppress("UNCHECKED_CAST")
 fun <T> DialogFragment.getDialogResultListener(): T {
 
-    val type = arguments.getSerializable("ViewUtils:targetType") as? DialogTargetType
-            ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
+    val type = arguments?.getSerializable("ViewUtils:targetType") as? DialogTargetType
+            ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" が正しくない。")
     return when (type) {
         DialogTargetType.FRAGMENT -> parentFragment as T
         DialogTargetType.ACTIVITY -> activity as T
@@ -45,7 +45,7 @@ fun <T> DialogFragment.getDialogResultListener(): T {
  * setDialogListenerでセットしたリクエストコードを取り出す。
  */
 fun DialogFragment.getDialogRequestCode(): Int {
-    return (arguments.getSerializable("ViewUtils:targetType") as? DialogTargetType)
-            ?.let { arguments.getInt("ViewUtils:requestCode") }
-            ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" がnull。")
+    return (arguments?.getSerializable("ViewUtils:targetType") as? DialogTargetType)
+            ?.let { arguments?.getInt("ViewUtils:requestCode") }
+            ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" が正しくない。")
 }

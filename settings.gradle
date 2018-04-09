@@ -1,1 +1,1 @@
-include ':lib', ':uuidgenerator', ':rxandroid', ':realm'
+include ':lib', ':uuidgenerator', ':rxandroid', ':realm', ':androidbinding'
