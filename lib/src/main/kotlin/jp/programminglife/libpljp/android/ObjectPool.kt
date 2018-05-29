@@ -19,6 +19,18 @@ class ObjectPool<T>(private val create: () -> T, val maxPoolSize: Int = 10, val 
     }
 
 
+    inline fun <R> acquire(block: (T) -> R): R {
+        return acquire().let {
+            try {
+                block.invoke(it)
+            }
+            finally {
+                release(it)
+            }
+        }
+    }
+
+
     fun release(obj: T) {
 
         releaseCount++
