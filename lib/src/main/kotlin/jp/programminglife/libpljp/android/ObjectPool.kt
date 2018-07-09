@@ -5,7 +5,8 @@ package jp.programminglife.libpljp.android
  * オブジェクトプール。
  * このクラスはスレッドセーフではない。
  */
-class ObjectPool<T>(private val create: () -> T, val maxPoolSize: Int = 10, val duplicateCheck: Boolean = true) {
+class ObjectPool<T>(private val create: () -> T, private val init: ((T) -> Unit)? = null,
+        private val maxPoolSize: Int = 10, private val duplicateCheck: Boolean = true) {
 
     private val pool = java.util.ArrayDeque<T>()
     private var acquireCount = 0
@@ -15,7 +16,8 @@ class ObjectPool<T>(private val create: () -> T, val maxPoolSize: Int = 10, val 
 
     fun acquire(): T {
         acquireCount++
-        return pool.poll()?.apply { hitCount++ } ?: create()
+        return (pool.poll()?.apply { hitCount++ } ?: create())
+                .also { init?.invoke(it) }
     }
 
 
