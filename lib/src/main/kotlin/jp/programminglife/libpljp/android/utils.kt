@@ -5,6 +5,7 @@ import android.os.Bundle
 import java.util.EnumSet
 import java.util.Locale
 import java.util.UUID
+import kotlin.math.sign
 
 
 // UUID
@@ -32,9 +33,11 @@ fun <E: Enum<E>> Bundle.putEnumSet(key: String, value: EnumSet<E>?) {
 
 // math
 
-fun signum(n: Long) = (n / Math.abs(n)).toInt()
+@Deprecated("廃止", replaceWith = ReplaceWith("n.sign", "kotlin.math.sign"))
+fun signum(n: Long) = n.sign
 
-fun signum(n: Int) = n / Math.abs(n)
+@Deprecated("廃止", replaceWith = ReplaceWith("n.sign", "kotlin.math.sign"))
+fun signum(n: Int) = n.sign
 
 
 // EnumSet
