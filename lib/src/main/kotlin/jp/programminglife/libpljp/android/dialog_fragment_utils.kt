@@ -2,8 +2,6 @@ package jp.programminglife.libpljp.android
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.Fragment
 
 
 enum class DialogTargetType {
@@ -15,9 +13,9 @@ enum class DialogTargetType {
  * ダイアログの結果を受け取るFragmentを設定する。
  * このメソッドを使用するためには DialogFragment を childFragmentManager を使って表示する必要がある。
  */
-fun DialogFragment.setDialogResultListener(listener:Any, dialogArguments: Bundle, requestCode: Int) {
+fun androidx.fragment.app.DialogFragment.setDialogResultListener(listener:Any, dialogArguments: Bundle, requestCode: Int) {
     when (listener) {
-        is Fragment -> {
+        is androidx.fragment.app.Fragment -> {
             dialogArguments.putSerializable("ViewUtils:targetType", DialogTargetType.FRAGMENT)
             dialogArguments.putInt("ViewUtils:requestCode", requestCode)
         }
@@ -30,7 +28,7 @@ fun DialogFragment.setDialogResultListener(listener:Any, dialogArguments: Bundle
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T> DialogFragment.getDialogResultListener(): T {
+fun <T> androidx.fragment.app.DialogFragment.getDialogResultListener(): T {
 
     val type = arguments?.getSerializable("ViewUtils:targetType") as? DialogTargetType
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" が正しくない。")
@@ -44,7 +42,7 @@ fun <T> DialogFragment.getDialogResultListener(): T {
 /**
  * setDialogListenerでセットしたリクエストコードを取り出す。
  */
-fun DialogFragment.getDialogRequestCode(): Int {
+fun androidx.fragment.app.DialogFragment.getDialogRequestCode(): Int {
     return (arguments?.getSerializable("ViewUtils:targetType") as? DialogTargetType)
             ?.let { arguments?.getInt("ViewUtils:requestCode") }
             ?: throw RuntimeException("ダイアログ引数の \"ViewUtils:targetType\" が正しくない。")

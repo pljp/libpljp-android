@@ -3,6 +3,7 @@ group = 'jp.programminglife'
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'maven'
 
 gradle.projectsEvaluated {
@@ -12,14 +13,14 @@ gradle.projectsEvaluated {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName version
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -48,10 +49,12 @@ task sourcesJar(type: Jar) {
 }
 
 dependencies {
-    api "com.android.support:support-annotations:$support_lib_version"
-    api "com.android.support:support-v4:$support_lib_version"
+    api 'androidx.annotation:annotation:1.0.0'
+    api 'androidx.legacy:legacy-support-v4:1.0.0'
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
 }
 
 artifacts {

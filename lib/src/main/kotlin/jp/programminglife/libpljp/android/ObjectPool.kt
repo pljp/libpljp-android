@@ -21,19 +21,6 @@ class ObjectPool<T>(private val create: () -> T, private val init: ((T) -> Unit)
     }
 
 
-    @Deprecated("")
-    inline fun <R> acquire(block: (T) -> R): R {
-        return acquire().let {
-            try {
-                block.invoke(it)
-            }
-            finally {
-                release(it)
-            }
-        }
-    }
-
-
     inline fun <R> use(block: (T) -> R): R {
         return acquire().let {
             try {

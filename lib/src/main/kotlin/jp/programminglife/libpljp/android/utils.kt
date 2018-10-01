@@ -19,7 +19,7 @@ fun nodeIdStr(context: Context) = UUIDUtils.getDeviceNodeId(context).toString(16
 
 // Bundle
 
-inline fun <reified E: Enum<E>> Bundle.getEnum(key: String) = getString(key).let { enumValueOf<E>(it) }
+inline fun <reified E: Enum<E>> Bundle.getEnum(key: String) = getString(key)?.let { enumValueOf<E>(it) }
 
 fun <E: Enum<E>> Bundle.putEnum(key:String, value: E) { putString(key, value.name) }
 

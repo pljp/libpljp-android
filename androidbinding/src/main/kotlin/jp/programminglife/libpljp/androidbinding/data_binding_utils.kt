@@ -1,7 +1,7 @@
 package jp.programminglife.libpljp.androidbinding
 
-import android.databinding.Observable
-import android.databinding.ObservableList
+import androidx.databinding.Observable
+import androidx.databinding.ObservableList
 
 
 fun onPropertyChangedCallback(callback: Observable.(Int) -> Unit) = object: Observable.OnPropertyChangedCallback() {

@@ -25,14 +25,15 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import java.lang.ref.WeakReference;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;

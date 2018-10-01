@@ -1,11 +1,11 @@
 package jp.programminglife.libpljp.androidbinding
 
-import android.databinding.InverseBindingListener
-import android.databinding.InverseBindingMethod
 import android.view.View
 import android.widget.AbsListView
 import android.widget.Adapter
 import android.widget.AdapterView
+import androidx.databinding.InverseBindingListener
+import androidx.databinding.InverseBindingMethod
 import jp.programminglife.libpljp.android.Logger
 
 
@@ -15,7 +15,7 @@ private val log = Logger.get(
 
 // AdapterView.selectedItem の2-Wayバインディングに関するアダプター
 
-@android.databinding.BindingAdapter("selectedItem")
+@androidx.databinding.BindingAdapter("selectedItem")
 fun <A: Adapter> AdapterView<A>.setSelectedItem(item: Any?) {
     val adapter = adapter ?: return
     (0 until adapter.count)
@@ -24,7 +24,7 @@ fun <A: Adapter> AdapterView<A>.setSelectedItem(item: Any?) {
             ?: let { log.v("set invalid position"); setSelection(AdapterView.INVALID_POSITION) }
 }
 
-@android.databinding.BindingAdapter("android:onItemSelected", "android:onNothingSelected", "selectedItemAttrChanged", requireAll = false)
+@androidx.databinding.BindingAdapter("android:onItemSelected", "android:onNothingSelected", "selectedItemAttrChanged", requireAll = false)
 fun <A: Adapter> AdapterView<A>.setOnItemSelectedListener(
         onItemSelectedListener: OnItemSelected?,
         onNothingSelectedListener: OnNothingSelected?,
@@ -56,20 +56,20 @@ interface OnNothingSelected {
     fun onNothingSelected(parent: AdapterView<*>)
 }
 
-@android.databinding.InverseBindingMethods(InverseBindingMethod(type = AdapterView::class, attribute = "selectedItem"))
+@androidx.databinding.InverseBindingMethods(InverseBindingMethod(type = AdapterView::class, attribute = "selectedItem"))
 class AdapterViewBindingAdapters
 
 
 
 // ListView.checkedItemPosition の2-wayバインディングに関するアダプター
 
-@android.databinding.BindingAdapter("checkedItemPosition")
+@androidx.databinding.BindingAdapter("checkedItemPosition")
 fun AbsListView.setCheckedItemPosition(position: Int) {
     if ( checkedItemPosition != position )
         setItemChecked(position, true)
 }
 
-@android.databinding.BindingAdapter("checkedItemPositionAttrChanged")
+@androidx.databinding.BindingAdapter("checkedItemPositionAttrChanged")
 fun AbsListView.setOnAbsListViewItemClickListener(listener: InverseBindingListener?) {
     if ( listener != null ) {
         setOnItemClickListener { _, _, _, _ -> listener.onChange() }
@@ -78,7 +78,7 @@ fun AbsListView.setOnAbsListViewItemClickListener(listener: InverseBindingListen
     }
 }
 
-@android.databinding.InverseBindingMethods(
+@androidx.databinding.InverseBindingMethods(
         InverseBindingMethod(type = AbsListView::class, attribute = "checkedItemPosition")
 )
 class AbsListViewBindingAdapters

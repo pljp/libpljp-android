@@ -29,14 +29,15 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EdgeEffect;
 import android.widget.OverScroller;
+
+import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
 
 /**
  * OverScrollerとEdgeEffectを持ったビューの基本クラス。
