@@ -1,14 +1,13 @@
 package jp.programminglife.libpljp.android.experimental
 
 import java.util.ArrayDeque
-import kotlin.coroutines.experimental.buildSequence
 
 
 class TreeTraverser<T>(private val children: (T) -> Iterable<T>) {
 
     fun preOrderTraversal(root: T): Sequence<T> {
 
-        return buildSequence {
+        return sequence {
             val stack = ArrayDeque<Iterator<T>>()
             stack.push(listOf(root).iterator())
 
@@ -30,7 +29,7 @@ class TreeTraverser<T>(private val children: (T) -> Iterable<T>) {
 
     fun postOrderTraversal(root: T): Sequence<T> {
 
-        return buildSequence {
+        return sequence {
             val itrStack = ArrayDeque<Iterator<T>>()
             val nodeStack = ArrayDeque<T>()
             itrStack.push(children(root).iterator())

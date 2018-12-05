@@ -41,7 +41,7 @@ android {
         enabled = true
     }
 }
-kotlin { experimental { coroutines 'enable' } }
+kotlin { experimental { } }
 
 task sourcesJar(type: Jar) {
     classifier = 'sources'
