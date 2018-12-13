@@ -1,7 +1,7 @@
 buildscript {
-    ext.lib_version = '1.1.0-SNAPSHOT'
+    ext.lib_version = '1.1.0'
     ext.android_studio_version = '3.2.1'
-    ext.kotlin_version = '1.3.10'
+    ext.kotlin_version = '1.3.11'
     repositories {
         google()
         jcenter()
