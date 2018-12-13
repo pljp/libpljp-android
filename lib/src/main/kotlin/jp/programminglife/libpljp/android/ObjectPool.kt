@@ -43,3 +43,29 @@ class ObjectPool<T>(private val create: () -> T, private val init: ((T) -> Unit)
     }
 
 }
+
+
+class SynchronizedObjectPool<T>(create: () -> T, init: ((T) -> Unit)? = null, maxPoolSize: Int = 10,
+        duplicateCheck: Boolean = true) {
+
+    private val pool = ObjectPool(create, init, maxPoolSize, duplicateCheck)
+
+    @Synchronized
+    fun acquire(): T = pool.acquire()
+
+    inline fun <R> use(block: (T) -> R): R {
+        return acquire().let {
+            try {
+                block.invoke(it)
+            }
+            finally {
+                release(it)
+            }
+        }
+    }
+
+    @Synchronized
+    fun release(obj: T) {
+        pool.release(obj)
+    }
+}
