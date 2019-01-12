@@ -16,7 +16,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 18
         targetSdkVersion 28
         versionCode 1
         versionName version
@@ -51,10 +51,10 @@ task sourcesJar(type: Jar) {
 dependencies {
     api 'androidx.annotation:annotation:1.0.1'
     api 'androidx.legacy:legacy-support-v4:1.0.0'
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
 }
 
 artifacts {
