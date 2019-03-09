@@ -22,6 +22,7 @@ package jp.programminglife.libpljp.android;
 
 
 import android.content.Context;
+import android.os.SystemClock;
 
 import java.util.UUID;
 
@@ -35,19 +36,26 @@ public class UUIDGenerator {
 
     @Deprecated
     public String generateString() {
-        return UUIDUtils.generateString(context);
+        return UUIDUtils.INSTANCE.generate(
+                context,
+                System.currentTimeMillis(),
+                SystemClock.elapsedRealtimeNanos()
+        ).toString();
     }
     public String generateString(long time) {
-        return UUIDUtils.generateString(context, time);
+        return UUIDUtils.INSTANCE.generate(context, time, SystemClock.elapsedRealtimeNanos()).toString();
     }
 
 
     @Deprecated
     public UUID generate() {
-        return UUIDUtils.generate(context);
+        return UUIDUtils.INSTANCE.generate(
+                context,
+                System.currentTimeMillis(),
+                SystemClock.elapsedRealtimeNanos());
     }
     public UUID generate(long time) {
-        return UUIDUtils.generate(context, time);
+        return UUIDUtils.INSTANCE.generate(context, time, SystemClock.elapsedRealtimeNanos());
     }
 
 }

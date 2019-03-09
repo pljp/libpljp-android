@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import jp.programminglife.libpljp.android.Logger;
-import jp.programminglife.libpljp.android.UUIDUtils;
+import jp.programminglife.libpljp.android.UUIDUtilsJava;
 import jp.programminglife.libpljp.android.uuidgenerator.databinding.MainActivityABinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
                 final Editable nodeIdText = binding.aNodeIdText.getText();
                 long nodeId = 0;
                 if ( nodeIdText == null || nodeIdText.length() == 0 ) {
-                    nodeId = UUIDUtils.getDeviceNodeId(MainActivity.this);
+                    nodeId = UUIDUtilsJava.getDeviceNodeId(MainActivity.this);
                 }
                 else {
                     try {
@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 StringBuilder sb = new StringBuilder();
                 for (int i=0; i<n; i++) {
-                    sb.append(UUIDUtils.generate(nodeId, System.currentTimeMillis())).append("\n");
+                    sb.append(UUIDUtilsJava.generate(nodeId, System.currentTimeMillis())).append("\n");
                 }
                 binding.aUuidText.setText(sb.toString());
             }

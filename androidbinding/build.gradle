@@ -64,7 +64,7 @@ dependencies {
     api project(':lib')
     api 'androidx.annotation:annotation:1.0.1'
     api 'androidx.legacy:legacy-support-v4:1.0.0'
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     kapt "androidx.databinding:databinding-compiler:$android_studio_version"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.0'

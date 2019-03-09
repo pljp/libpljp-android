@@ -8,15 +8,6 @@ import java.util.UUID
 import kotlin.math.sign
 
 
-// UUID
-
-val UUID.epochMilli get() = UUIDUtils.toEpochMilli(timestamp())
-
-val UUID.nodeId get() = node().toString(16).toUpperCase(Locale.US)
-
-fun nodeIdStr(context: Context) = UUIDUtils.getDeviceNodeId(context).toString(16).toUpperCase(Locale.US)
-
-
 // Bundle
 
 inline fun <reified E: Enum<E>> Bundle.getEnum(key: String) = getString(key)?.let { enumValueOf<E>(it) }

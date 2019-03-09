@@ -51,6 +51,7 @@ uploadArchives {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
     //compile "com.android.support:appcompat-v7:$kotlin_version"
 }
