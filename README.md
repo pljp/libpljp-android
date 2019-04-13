@@ -1,5 +1,6 @@
 libpljp-android
 ===============
+[![](https://jitpack.io/v/jp.programminglife/libpljp-android.svg)](https://jitpack.io/#jp.programminglife/libpljp-android)
 
 License
 ===============

@@ -1,10 +1,7 @@
 package jp.programminglife.libpljp.android
 
-import android.content.Context
 import android.os.Bundle
 import java.util.EnumSet
-import java.util.Locale
-import java.util.UUID
 import kotlin.math.sign
 
 
@@ -40,3 +37,5 @@ inline fun <reified E : Enum<E>> enumSetOf(serializedValue: String): EnumSet<E> 
         .filter { it.isNotEmpty() }
         .map { enumValueOf<E>(it) }
         .fold(EnumSet.noneOf(E::class.java)) { s, e -> s.add(e); s }
+
+inline fun <reified T: Enum<T>> emptyEnumSet(): EnumSet<T> = EnumSet.noneOf(T::class.java)
