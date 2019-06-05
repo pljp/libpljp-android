@@ -10,7 +10,7 @@ import jp.programminglife.libpljp.android.Logger
 
 
 private class adapter_view_utils
-private val log = Logger.get(
+private val log = Logger.Companion.get(
         adapter_view_utils::class.java)
 
 // AdapterView.selectedItem の2-Wayバインディングに関するアダプター

@@ -11,7 +11,7 @@ import rx.observables.SyncOnSubscribe;
 
 public final class CursorOnSubscribe<T> extends SyncOnSubscribe<Cursor, T> {
 
-    private final Logger log = Logger.get(CursorOnSubscribe.class);
+    private final Logger log = Logger.Companion.get(CursorOnSubscribe.class);
     private final Func0<Cursor> queryRunner;
     private final Func1<Cursor, T> cursorReader;
 

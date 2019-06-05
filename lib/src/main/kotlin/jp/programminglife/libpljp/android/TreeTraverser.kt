@@ -5,6 +5,9 @@ import java.util.ArrayDeque
 
 class TreeTraverser<T>(private val children: (T) -> Iterable<T>) {
 
+    /**
+     * 親ノード優先でツリーを横断する。
+     */
     fun preOrderTraversal(root: T): Sequence<T> {
 
         return sequence {
@@ -27,6 +30,9 @@ class TreeTraverser<T>(private val children: (T) -> Iterable<T>) {
 
     }
 
+    /**
+     * 子ノード優先でツリーを横断する。
+     */
     fun postOrderTraversal(root: T): Sequence<T> {
 
         return sequence {

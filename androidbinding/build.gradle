@@ -1,5 +1,5 @@
 version = lib_version
-group = 'jp.programminglife'
+group = 'jp.programminglife.libpljp-android'
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'

@@ -45,7 +45,7 @@ import androidx.core.view.ViewCompat;
  */
 public class ScrollableView extends View {
 
-    final Logger log = Logger.get(ScrollableView.class);
+    final Logger log = Logger.Companion.get(ScrollableView.class);
     private final ScrollableView self = this;
 
     // 各種サイズ
