@@ -23,7 +23,6 @@ package jp.programminglife.libpljp.android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.preference.PreferenceManager;
 
 import java.security.SecureRandom;
 import java.util.Calendar;
@@ -32,6 +31,7 @@ import java.util.UUID;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 
 @Deprecated

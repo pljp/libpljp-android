@@ -22,7 +22,7 @@ package jp.programminglife.libpljp.android
 
 import android.content.Context
 import android.os.SystemClock
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Locale

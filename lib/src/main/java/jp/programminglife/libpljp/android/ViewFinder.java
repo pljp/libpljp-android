@@ -28,6 +28,7 @@ import android.view.View;
  * Viewの検索を簡略化するユーティリティクラス。
  * インスタンスはスレッドセーフではない。
  */
+@Deprecated
 abstract public class ViewFinder {
 
     /**
