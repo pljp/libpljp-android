@@ -1,5 +1,6 @@
 package jp.programminglife.libpljp.realm
 
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import io.realm.Case
 import io.realm.Realm
@@ -67,13 +68,20 @@ inline fun <R> Realm.tx(transaction: Realm.() -> R): R {
 
 }
 
+@Deprecated("asLiveDataを使う。", replaceWith = ReplaceWith("asLiveData()", "jp.programminglife.libpljp.realm.asLiveData"))
+fun <T> RealmResults<T>.toLiveData() = asLiveData()
 
-fun <T> RealmResults<T>.toLiveData() = object : androidx.lifecycle.LiveData<List<T>>() {
+fun <T> RealmResults<T>.asLiveData() = object : androidx.lifecycle.LiveData<List<T>>() {
 
-    private val changeListener = RealmChangeListener<RealmResults<T>> { value = it }
+    private val changeListener = RealmChangeListener<RealmResults<T>> {
+        if (Looper.myLooper() == Looper.getMainLooper())
+            value = it
+        else
+            postValue(it)
+    }
 
     init {
-        value = this@toLiveData
+        value = this@asLiveData
     }
 
     override fun onActive() {
@@ -85,17 +93,26 @@ fun <T> RealmResults<T>.toLiveData() = object : androidx.lifecycle.LiveData<List
     }
 }
 
+
+@Deprecated("asSingleLiveDataを使う。", replaceWith = ReplaceWith("asSingleLiveData()", "jp.programminglife.libpljp.realm.asSingleLiveData"))
+fun <T> RealmResults<T>.toSingleLiveData() = asLiveData()
 
 /**
  * [RealmResults]から最初の1件だけを取り出して[LiveData]でラップする。
  * 検索結果が0件になったときは[androidx.lifecycle.Observer]にnullが通知される。
  */
-fun <T> RealmResults<T>.toSingleLiveData() = object : androidx.lifecycle.LiveData<T>() {
+fun <T> RealmResults<T>.asSingleLiveData() = object : androidx.lifecycle.LiveData<T>() {
 
-    private val changeListener = RealmChangeListener<RealmResults<T>> { value = it.firstOrNull() }
+    private val changeListener = RealmChangeListener<RealmResults<T>> {
+        val newValue = it.firstOrNull()
+        if (Looper.myLooper() == Looper.getMainLooper())
+            value = newValue
+        else
+            postValue(newValue)
+    }
 
     init {
-        value = this@toSingleLiveData.firstOrNull()
+        value = this@asSingleLiveData.firstOrNull()
     }
 
     override fun onActive() {
@@ -107,16 +124,28 @@ fun <T> RealmResults<T>.toSingleLiveData() = object : androidx.lifecycle.LiveDat
     }
 }
 
+@Deprecated("asLiveDataを使う", replaceWith = ReplaceWith("asLiveData()", "jp.programminglife.libpljp.realm.asLiveData"))
+fun <T: RealmObject> T.toLiveData() = asLiveData()
+
+
 /**
  * [RealmObject]を[LiveData]でラップする。
  * [RealmObject]が無効になった時は[androidx.lifecycle.Observer]にnull値を通知する。
  */
-fun <T: RealmObject> T.toLiveData() = object : LiveData<T>() {
+fun <T: RealmObject> T.asLiveData() = object : LiveData<T>() {
 
-    private val changeListener = RealmChangeListener<T> { value = it.takeIf { it.isValid} }
+    private val changeListener = RealmChangeListener<T> {
+        val newValue = it.takeIf { it.isValid }
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            value = newValue
+        }
+        else {
+            postValue(newValue)
+        }
+    }
 
     init {
-        value = this@toLiveData.takeIf { it.isValid }
+        value = this@asLiveData.takeIf { it.isValid }
     }
 
     override fun onActive() {
@@ -126,4 +155,5 @@ fun <T: RealmObject> T.toLiveData() = object : LiveData<T>() {
     override fun onInactive() {
         removeChangeListener(changeListener)
     }
+
 }
