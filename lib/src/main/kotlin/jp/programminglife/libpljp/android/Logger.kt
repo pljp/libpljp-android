@@ -130,7 +130,7 @@ class Logger private constructor(
                             methodName = em.name + ":" + methodName
                     }
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 // Skip
             }
 
