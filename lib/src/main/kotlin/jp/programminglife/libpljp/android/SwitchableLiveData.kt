@@ -1,4 +1,4 @@
-package jp.programminglife.libpljp.realm
+package jp.programminglife.libpljp.android
 
 import android.os.Looper
 import androidx.lifecycle.LiveData
