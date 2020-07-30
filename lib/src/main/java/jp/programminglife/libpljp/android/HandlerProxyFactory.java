@@ -20,17 +20,18 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
-import android.os.Handler;
-import android.os.Looper;
 
 
 /**
  * インターフェイスのメソッドをLooperに関連付けられたスレッドで実行するProxyを作成するファクトリクラス。
  */
+@Deprecated
 public class HandlerProxyFactory {
 
     private static final class InvocationHandler_ implements InvocationHandler {

@@ -8,18 +8,21 @@ import android.os.Bundle
 /**
  * ビューモデルからビューに対して指示を出すコマンドのインターフェイス。
  */
+@Deprecated("")
 interface ViewCommand
 
 /**
  * ViewCommandを処理するハンドラー関数の型。
  * ViewCommandを処理したらtrueを返す。このハンドラーで処理できないコマンドだったらfalseを返す。
  */
+@Deprecated("")
 typealias ViewCommandHandler = (ViewCommand) -> Boolean
 
 
 /**
  * ハンドラーの集合。
  */
+@Deprecated("")
 class ViewCommandHandlerSet(vararg val handlers: ViewCommandHandler) {
     /**
      * コマンドを処理する。
@@ -29,9 +32,11 @@ class ViewCommandHandlerSet(vararg val handlers: ViewCommandHandler) {
 }
 
 
+@Deprecated("")
 data class StartActivityCommand(val activityClass: Class<*>, val extras: Bundle) : ViewCommand
 
 
+@Deprecated("")
 fun startActivityCommandHandler(context: Context) : ViewCommandHandler = { command ->
     (command as? StartActivityCommand)?.run {
         val intent = Intent(context, activityClass)
@@ -42,9 +47,11 @@ fun startActivityCommandHandler(context: Context) : ViewCommandHandler = { comma
 }
 
 
+@Deprecated("")
 class FinishActivityCommand : ViewCommand
 
 
+@Deprecated("")
 fun finishActivityCommandHandler(activity: Activity) : ViewCommandHandler = { command ->
     (command as? FinishActivityCommand)?.run {
         activity.finish()

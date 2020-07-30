@@ -26,6 +26,7 @@ import android.os.SystemClock;
 
 import java.util.UUID;
 
+@Deprecated
 public class UUIDGenerator {
 
     private final Context context;

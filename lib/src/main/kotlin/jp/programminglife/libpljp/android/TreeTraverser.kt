@@ -3,6 +3,7 @@ package jp.programminglife.libpljp.android
 import java.util.ArrayDeque
 
 
+@Deprecated("")
 class TreeTraverser<T>(private val children: (T) -> Iterable<T>) {
 
     /**

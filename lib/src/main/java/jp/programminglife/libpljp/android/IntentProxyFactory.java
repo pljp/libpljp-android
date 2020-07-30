@@ -42,6 +42,7 @@ import java.util.Arrays;
  * 作成されたIntentにはプロキシオブジェクトのクラス情報は含まれていないため、プロキシの型とexecuteメソッドに渡されたObjectの型に互換性があるかどうかは
  * このクラスのクライアント側で確認する必要がある。
  */
+@Deprecated
 public final class IntentProxyFactory {
 
     private static final String EXTRA_METHOD =                    "jp.programminglife.libpljp.android.method";

@@ -20,6 +20,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 package jp.programminglife.libpljp.android;
 
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,16 +32,13 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-
 
 /**
  * データの保持にSortedMapを使うアダプター。
  * @param <K> 内部に保持するデータのキー。データはこのキーでコンストラクタに渡されたComparatorでソートされる。
  * @param <V> 内部に保持するデータの型。
  */
+@Deprecated
 abstract public class SortedMapAdapter<K, V> extends BaseAdapter {
 
     private final TreeMap<K, V> objects;

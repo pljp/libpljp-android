@@ -35,6 +35,7 @@ import java.util.List;
  * 複数のコールバックメソッドの一括呼び出しを簡単にするクラス。このクラスはスレッドセーフ。
  * @param <T> コールバックオブジェクトのインターフェイス型。
  */
+@Deprecated
 public final class CallbackSupport<T> {
 
     public static <I> CallbackSupport<I> create(Class<I> interfaceClass) {
