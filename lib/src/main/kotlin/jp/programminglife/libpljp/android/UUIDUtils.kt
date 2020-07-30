@@ -36,7 +36,6 @@ import kotlin.concurrent.write
 object UUIDUtils {
 
     internal val millis1582_10_15: Long
-    private val UUID_NODE_KEY = UUIDUtils::class.java.name + ":node"
     private val rnd = SecureRandom()
     private val nodeLock = ReentrantReadWriteLock()
     private val clockSeqLock = Any()
@@ -104,11 +103,12 @@ object UUIDUtils {
     fun getDeviceNodeId(context: Context): Long {
         val sp = PreferenceManager.getDefaultSharedPreferences(context)
         return nodeLock.read {
-            sp.getLong(UUID_NODE_KEY, 0L).takeIf { it != 0L } ?: let {
+            val key = context.applicationInfo.packageName + ":uuid_node"
+            sp.getLong(key, 0L).takeIf { it != 0L } ?: let {
                 nodeLock.write {
                     (rnd.nextLong() and 0xffffffffffffL or 0x010000000000L).also {
                         val editor = sp.edit()
-                        editor.putLong(UUID_NODE_KEY, it)
+                        editor.putLong(key, it)
                         editor.apply()
                     }
                 }
