@@ -1,7 +1,7 @@
 buildscript {
-    ext.lib_version = '1.6.1'
-    ext.android_studio_version = '4.0.1'
-    ext.kotlin_version = '1.4.0'
+    ext.lib_version = '1.6.2'
+    ext.android_studio_version = '4.1.1'
+    ext.kotlin_version = '1.4.21'
     ext.lifecycle_version = '2.2.0'
     repositories {
         google()

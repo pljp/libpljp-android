@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/androidbinding/androidbinding.iml" filepath="$PROJECT_DIR$/androidbinding/androidbinding.iml" group="libpljp_android/androidbinding" />
-      <module fileurl="file://$PROJECT_DIR$/lib/lib.iml" filepath="$PROJECT_DIR$/lib/lib.iml" group="libpljp_android/lib" />
-      <module fileurl="file://$PROJECT_DIR$/libpljp_android.iml" filepath="$PROJECT_DIR$/libpljp_android.iml" group="libpljp_android" />
-      <module fileurl="file://$PROJECT_DIR$/realm/realm.iml" filepath="$PROJECT_DIR$/realm/realm.iml" group="libpljp_android/realm" />
-      <module fileurl="file://$PROJECT_DIR$/rxandroid/rxandroid.iml" filepath="$PROJECT_DIR$/rxandroid/rxandroid.iml" group="libpljp_android/rxandroid" />
-      <module fileurl="file://$PROJECT_DIR$/uuidgenerator/uuidgenerator.iml" filepath="$PROJECT_DIR$/uuidgenerator/uuidgenerator.iml" group="libpljp_android/uuidgenerator" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libpljp-android.iml" filepath="$PROJECT_DIR$/.idea/modules/libpljp-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/androidbinding/libpljp-android.androidbinding.iml" filepath="$PROJECT_DIR$/.idea/modules/androidbinding/libpljp-android.androidbinding.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/libpljp-android.lib.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/libpljp-android.lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/realm/libpljp-android.realm.iml" filepath="$PROJECT_DIR$/.idea/modules/realm/libpljp-android.realm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rxandroid/libpljp-android.rxandroid.iml" filepath="$PROJECT_DIR$/.idea/modules/rxandroid/libpljp-android.rxandroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp-android.uuidgenerator.iml" filepath="$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp-android.uuidgenerator.iml" />
     </modules>
   </component>
 </project>
