@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libpljp-android.iml" filepath="$PROJECT_DIR$/.idea/modules/libpljp-android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/androidbinding/libpljp-android.androidbinding.iml" filepath="$PROJECT_DIR$/.idea/modules/androidbinding/libpljp-android.androidbinding.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/libpljp-android.lib.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/libpljp-android.lib.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/realm/libpljp-android.realm.iml" filepath="$PROJECT_DIR$/.idea/modules/realm/libpljp-android.realm.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rxandroid/libpljp-android.rxandroid.iml" filepath="$PROJECT_DIR$/.idea/modules/rxandroid/libpljp-android.rxandroid.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp-android.uuidgenerator.iml" filepath="$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp-android.uuidgenerator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libpljp_android.iml" filepath="$PROJECT_DIR$/.idea/modules/libpljp_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/androidbinding/libpljp_android.androidbinding.iml" filepath="$PROJECT_DIR$/.idea/modules/androidbinding/libpljp_android.androidbinding.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/lib/libpljp_android.lib.iml" filepath="$PROJECT_DIR$/.idea/modules/lib/libpljp_android.lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/realm/libpljp_android.realm.iml" filepath="$PROJECT_DIR$/.idea/modules/realm/libpljp_android.realm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/rxandroid/libpljp_android.rxandroid.iml" filepath="$PROJECT_DIR$/.idea/modules/rxandroid/libpljp_android.rxandroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp_android.uuidgenerator.iml" filepath="$PROJECT_DIR$/.idea/modules/uuidgenerator/libpljp_android.uuidgenerator.iml" />
     </modules>
   </component>
 </project>

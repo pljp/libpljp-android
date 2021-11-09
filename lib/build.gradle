@@ -4,7 +4,7 @@ group = 'jp.programminglife.libpljp-android'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
@@ -18,8 +18,6 @@ android {
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 29
-        versionCode 1
-        versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     sourceSets {
@@ -60,11 +58,13 @@ artifacts {
     archives sourcesJar
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "file:${System.getProperty('user.home')}/.m2/repository")
-            pom.artifactId = 'libpljp-android'
+afterEvaluate {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifactId = 'libpljp-android'
+                from components.release
+            }
         }
     }
 }

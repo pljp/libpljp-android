@@ -1,23 +1,23 @@
 buildscript {
-    ext.lib_version = '1.6.2'
-    ext.android_studio_version = '4.1.1'
+    ext.lib_version = '1.7.0-build3'
+    ext.android_gradle_plugin_version = '7.0.3'
     ext.kotlin_version = '1.4.21'
     ext.lifecycle_version = '2.2.0'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:${android_studio_version}"
+        classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "io.realm:realm-gradle-plugin:5.15.1"
+        classpath "io.realm:realm-gradle-plugin:10.8.1"
     }
 }
 
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
