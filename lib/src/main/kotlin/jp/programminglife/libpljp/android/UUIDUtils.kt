@@ -22,7 +22,6 @@ package jp.programminglife.libpljp.android
 
 import android.content.Context
 import android.os.SystemClock
-import androidx.preference.PreferenceManager
 import java.security.SecureRandom
 import java.util.Calendar
 import java.util.Locale
@@ -98,10 +97,10 @@ object UUIDUtils {
 
     /**
      * UUIDのnode値を返す。この端末のnode値が決定していればそれを返す。
-     * node値はデフォルトのSharedPreferencesに記録される。
+     * node値は"uuid-node-id"SharedPreferencesに記録される。
      */
     fun getDeviceNodeId(context: Context): Long {
-        val sp = PreferenceManager.getDefaultSharedPreferences(context)
+        val sp = context.getSharedPreferences("uuid-node-id", Context.MODE_PRIVATE)
         return nodeLock.read {
             val key = context.applicationInfo.packageName + ":uuid_node"
             sp.getLong(key, 0L).takeIf { it != 0L } ?: let {
