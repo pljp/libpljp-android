@@ -21,25 +21,26 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 package jp.programminglife.libpljp.android;
 
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_UP;
+import static android.view.MotionEvent.ACTION_UP;
+
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
-import java.lang.ref.WeakReference;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import static android.view.MotionEvent.ACTION_DOWN;
-import static android.view.MotionEvent.ACTION_MOVE;
-import static android.view.MotionEvent.ACTION_POINTER_DOWN;
-import static android.view.MotionEvent.ACTION_POINTER_UP;
-import static android.view.MotionEvent.ACTION_UP;
+import java.lang.ref.WeakReference;
 
 public final class GestureDetector {
 
@@ -78,7 +79,7 @@ public final class GestureDetector {
         touchSlopSquare = viewConf.getScaledTouchSlop() * viewConf.getScaledTouchSlop();
         maxFlingVelocity = viewConf.getScaledMaximumFlingVelocity();
         minFlingVelocitySquare = viewConf.getScaledMinimumFlingVelocity() * viewConf.getScaledMinimumFlingVelocity();
-        handler = new Handler_(this);
+        handler = new Handler_(Looper.getMainLooper(), this);
         maxPointers = 10;
         log.v("double tap slop:%d", viewConf.getScaledDoubleTapSlop());
         log.v("touch slop:%d", viewConf.getScaledTouchSlop());
@@ -730,8 +731,8 @@ public final class GestureDetector {
         private WeakReference<GestureDetector> gesture;
 
 
-        public Handler_(GestureDetector gesture) {
-
+        public Handler_(Looper looper, GestureDetector gesture) {
+            super(looper);
             this.gesture = new WeakReference<>(gesture);
         }
 
