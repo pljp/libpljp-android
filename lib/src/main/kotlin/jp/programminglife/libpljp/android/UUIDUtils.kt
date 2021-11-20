@@ -32,6 +32,7 @@ import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 
+@Deprecated("廃止")
 object UUIDUtils {
 
     internal val millis1582_10_15: Long
@@ -154,8 +155,8 @@ object UUIDUtils {
 
 // UUID
 
-val UUID.epochMilli get() = timestamp() / 10000L + UUIDUtils.millis1582_10_15
+val UUID.epochMilli: Long get() = timestamp() / 10000L + UUIDUtils.millis1582_10_15
 
-val UUID.nodeIdString get() = node().toString(16).toUpperCase(Locale.US)
+val UUID.nodeIdString: String get() = node().toString(16).uppercase(Locale.US)
 
-fun nodeIdStr(context: Context) = UUIDUtils.getDeviceNodeId(context).toString(16).toUpperCase(Locale.US)
+fun nodeIdStr(context: Context): String = UUIDUtils.getDeviceNodeId(context).toString(16).uppercase(Locale.US)
