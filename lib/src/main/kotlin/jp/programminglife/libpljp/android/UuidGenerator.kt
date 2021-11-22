@@ -35,13 +35,20 @@ class UuidGenerator(private val repository: UuidRepository) {
             var uuid: UUID? = null
             while(uuid == null) {
                 uuid = generateInternal(repository, time, nano)
-                Thread.sleep(1L)
+                if (uuid == null) {
+                    Thread.sleep(1L)
+                }
             }
             uuid
         }
     }
 
 
+    /**
+     * UUIDを生成する。クロックシーケンスがオーバーフローしてこれ以上ユニークなIDの生成ができない場合はnullを返す。
+     * この場合、100ナノ秒またはシステムの時間解像度以上経過してからもう一度このメソッドを呼び出すとUUIDの生成に
+     * 成功する。
+     */
     private fun generateInternal(repository: UuidRepository, time: Long, nano: Long): UUID? {
         val lastNodeId = repository.loadNodeId()
         val lastTimestamp = UuidGenerator.lastTimestamp
