@@ -155,8 +155,8 @@ object UUIDUtils {
 
 // UUID
 
+@Deprecated("廃止")
 val UUID.epochMilli: Long get() = timestamp() / 10000L + UUIDUtils.millis1582_10_15
 
-val UUID.nodeIdString: String get() = node().toString(16).uppercase(Locale.US)
-
+@Deprecated("廃止")
 fun nodeIdStr(context: Context): String = UUIDUtils.getDeviceNodeId(context).toString(16).uppercase(Locale.US)

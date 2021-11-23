@@ -70,6 +70,9 @@ class UuidGenerator(private val repository: UuidRepository) {
     }
 
 
+    fun epochMilli(uuid: UUID): Long = uuid.timestamp() / 10000L + millis1582y10m15d
+
+
     companion object {
         @Volatile
         private var clockSeq: ClockSequence? = null
@@ -199,3 +202,6 @@ class UuidGenerator(private val repository: UuidRepository) {
 
     }
 }
+
+
+val UUID.nodeIdString: String get() = node().toString(16).uppercase(Locale.US)
