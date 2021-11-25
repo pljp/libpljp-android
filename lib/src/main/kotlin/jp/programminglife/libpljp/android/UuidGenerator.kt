@@ -202,10 +202,3 @@ class UuidGenerator(private val repository: UuidRepository) {
 
     }
 }
-
-
-val UUID.nodeIdString: String get() =
-    node().toString(16)
-        .uppercase(Locale.US)
-        .let { "000000000000$it" }
-        .takeLast(12)

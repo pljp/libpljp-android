@@ -71,14 +71,6 @@ class UuidTest {
     }
 
 
-    @Test
-    fun nodeIdStringFormat() {
-        val generator = UuidGenerator(ReadOnlyUuidRepository(0x123456789AL))
-        val uuid = generator.generate()
-        assertEquals("00123456789A", uuid.nodeIdString)
-    }
-
-
     private class ReadOnlyUuidRepository(private val nodeId: Long = 123456789L) : UuidGenerator.UuidRepository {
         override fun loadNodeId(): Long = nodeId
         override fun saveNodeId(nodeId: Long?) {}
