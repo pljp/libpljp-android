@@ -61,12 +61,18 @@ artifacts {
     archives sourcesJar
 }
 
+task sourceJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier "sources"
+}
+
 afterEvaluate {
     publishing {
         publications {
             maven(MavenPublication) {
                 artifactId = 'libpljp-android'
                 from components.release
+                artifact(sourceJar)
             }
         }
     }
