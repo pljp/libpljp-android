@@ -11,7 +11,6 @@ import java.util.*
 class UuidGenerator(private val repository: UuidRepository) {
     private val millis1582y10m15d: Long
     private val rnd = SecureRandom()
-    private val lock = Any()
 
 
     init {
@@ -74,6 +73,8 @@ class UuidGenerator(private val repository: UuidRepository) {
 
 
     companion object {
+        private val lock = Any()
+
         @Volatile
         private var clockSeq: ClockSequence? = null
 
