@@ -4,12 +4,12 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.switchMap
 
 class SwitchableLiveData<T> : LiveData<T>() {
 
     private val source = MutableLiveData<LiveData<T>>()
-    private val switchable: LiveData<T> = Transformations.switchMap(source) { it }
+    private val switchable: LiveData<T> = source.switchMap { it }
     private val observer = Observer<T> { value = it }
 
     fun switch(liveData: LiveData<T>) {

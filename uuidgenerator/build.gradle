@@ -1,19 +1,20 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.android.extensions'
+}
 
 android {
-    compileSdkVersion 31
+    namespace "jp.programminglife.libpljp.android.uuidgenerator"
+    compileSdk libs.versions.app.compileSdk.get().toInteger()
 
     defaultConfig {
+        minSdk libs.versions.app.minSdk.get().toInteger()
+        targetSdk libs.versions.app.targetSdk.get().toInteger()
         applicationId "jp.programminglife.libpljp.android.uuidgenerator"
-        minSdkVersion 18
-        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
     }
     buildTypes {
         release {
@@ -25,11 +26,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(8))
+            vendor = JvmVendorSpec.ADOPTOPENJDK
+        }
+    }
 }
 
 dependencies {
     implementation project(':lib')
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.constraintlayout
+    implementation libs.material
 }
