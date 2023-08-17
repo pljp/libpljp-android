@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'org.jetbrains.kotlin.android.extensions'
+    id 'com.google.devtools.ksp'
 }
 
 android {
@@ -32,11 +32,23 @@ android {
             vendor = JvmVendorSpec.ADOPTOPENJDK
         }
     }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion libs.versions.androidxCompose.compiler.get()
+    }
 }
 
 dependencies {
     implementation project(':lib')
-    implementation libs.androidx.appcompat
-    implementation libs.androidx.constraintlayout
-    implementation libs.material
+    implementation libs.accompanist.themeAdapter
+    implementation libs.androidx.activity
+    implementation libs.androidx.activitycompose
+    implementation platform(libs.androidx.compose.bom)
+    implementation 'androidx.compose.foundation:foundation'
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.material3:material3"
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    debugImplementation 'androidx.compose.ui:ui-tooling'
 }
