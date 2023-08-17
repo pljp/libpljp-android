@@ -3,7 +3,7 @@
 app-compileSdk = "33"
 app-minSdk = "21"
 app-targetSdk = "33"
-lib-version = "1.7.4"
+lib-version = "1.8.0"
 lib-group = "jp.programminglife.libpljp-android"
 kotlin ="1.8.22"
 kotlinxCoroutines = "1.7.3"
