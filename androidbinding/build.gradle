@@ -46,25 +46,20 @@ android {
     buildFeatures {
         dataBinding true
     }
-}
 
-tasks.register('sourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from android.sourceSets.main.java.srcDirs
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
 }
-
-artifacts {
-    archives sourcesJar
-}
-
 
 afterEvaluate {
     publishing {
         publications {
-            maven(MavenPublication) {
+            release(MavenPublication) {
                 artifactId = 'libpljp-androidbinding'
                 from components.release
-                artifact(sourcesJar)
             }
         }
     }
