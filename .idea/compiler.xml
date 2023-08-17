@@ -12,7 +12,7 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <bytecodeTargetLevel target="1.8">
-      <module name="libpljp-android.androidbinding" target="17" />
+      <module name="libpljp-android.androidbinding" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>
